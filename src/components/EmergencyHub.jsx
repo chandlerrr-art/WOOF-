@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { VERIFIED_CENTERS, FIRST_AID_GUIDES, CITIES } from '../data/mockData';
-import { Phone, Navigation, AlertCircle, ArrowRight, CheckCircle2, HeartPulse, Radio, Search, ShieldCheck, Timer, Star, BadgeAlert, Sparkles } from 'lucide-react';
+import { Phone, Navigation, AlertCircle, ArrowRight, CheckCircle2, HeartPulse, MapPin, Search } from 'lucide-react';
 
 export default function EmergencyHub({
   activeCity,
@@ -25,9 +25,7 @@ export default function EmergencyHub({
 
   return (
     <div>
-      {/* ==========================================================================
-          STITCH HERO SECTION
-          ========================================================================== */}
+      {/* Main introduction */}
       <section className="stitch-hero">
         <div className="stitch-hero-glow-1"></div>
         <div className="stitch-hero-glow-2"></div>
@@ -36,7 +34,7 @@ export default function EmergencyHub({
           <div className="stitch-hero-grid">
             {/* Left Hero Column */}
             <div>
-              {/* Status Indicator Pill from Stitch */}
+              {/* Location context */}
               <div style={{ 
                 display: 'inline-flex', 
                 alignItems: 'center', 
@@ -46,9 +44,9 @@ export default function EmergencyHub({
                 background: 'var(--color-surface-container)', 
                 boxShadow: 'var(--shadow-sm)'
               }}>
-                <span className="live-pulse-dot" style={{ backgroundColor: '#10b981', width: '8px', height: '8px' }}></span>
+                <MapPin size={15} style={{ color: 'var(--color-secondary)' }} />
                 <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-primary)', letterSpacing: '0.04em' }}>
-                  Unified Emergency Network Active
+                  Local help for animals in need
                 </span>
                 <span style={{ 
                   background: 'var(--color-secondary-fixed)', 
@@ -64,11 +62,11 @@ export default function EmergencyHub({
 
               {/* Stitch Hero Headline with Highlighter Effect */}
               <h1 className="stitch-hero-title">
-                Every Life Deserves a <span className="highlight-underline">Swift Rescue.</span>
+                A little help can <span className="highlight-underline">change everything.</span>
               </h1>
 
               <p style={{ fontSize: '16.5px', color: 'var(--color-text-muted)', lineHeight: '1.6', maxWidth: '600px' }}>
-                Immediate compassionate care, 24/7 autonomous volunteer dispatch, and state-certified clinic triage for companion animals and distressed street animals in <strong>{currentCityObj.name}</strong>.
+                Found an animal who needs care? Share what you see, find nearby animal-care services, or browse reports from your community in <strong>{currentCityObj.name}</strong>.
               </p>
 
               {/* Stitch Primary Dual Action Dock */}
@@ -78,7 +76,7 @@ export default function EmergencyHub({
                   onClick={onOpenReport}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>emergency</span>
-                  <span>Report Animal in Need</span>
+                  <span>Tell us what happened</span>
                 </button>
 
                 <button 
@@ -86,41 +84,13 @@ export default function EmergencyHub({
                   onClick={() => onNavigateTab('directory')}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--color-secondary-fixed)' }}>near_me</span>
-                  <span>Find Open Shelter</span>
+                  <span>Find local care</span>
                 </button>
               </div>
 
-              {/* Stitch Proof Banner & Face Cluster */}
-              <div className="proof-cluster">
-                <div className="avatar-stack">
-                  <img 
-                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80" 
-                    alt="Responder Field Operative" 
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" 
-                    alt="Veterinary Medic" 
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80" 
-                    alt="Volunteer Rescuer" 
-                  />
-                  <div className="avatar-more">+8k</div>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--color-secondary)' }}>
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={15} fill="currentColor" />
-                    ))}
-                  </div>
-                  <div style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--color-text-main)', marginTop: '2px' }}>
-                    8,940+ Animals Saved & Reunited
-                  </div>
-                  <div style={{ fontSize: '11.5px', color: 'var(--color-text-subtle)' }}>
-                    Validated rescue logs across 14 municipal zones in India
-                  </div>
-                </div>
+              <div className="hero-note">
+                <span className="hero-note-mark"><HeartPulse size={17} /></span>
+                <span>Start with the details you have. You can add a photo and location when you report.</span>
               </div>
             </div>
 
@@ -132,19 +102,12 @@ export default function EmergencyHub({
                   alt="Rescued companion dog and cat resting peacefully" 
                 />
                 
-                {/* Floating Triage Tag Top-Left */}
+                {/* Photo-led introduction */}
                 <div className="floating-tag-top-left">
-                  <span className="live-pulse-dot" style={{ backgroundColor: '#10b981', width: '7px', height: '7px' }}></span>
-                  <span>Status: Safe • In Clinical Triage</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>favorite</span>
+                    <span>Care begins with noticing</span>
                 </div>
 
-                {/* Floating Response Speed Tag Top-Right */}
-                <div className="floating-tag-top-right">
-                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>timer</span>
-                  <span>11m avg speed</span>
-                </div>
-
-                {/* Bottom Floating Profile Card */}
                 <div className="floating-profile-bar">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ 
@@ -161,24 +124,14 @@ export default function EmergencyHub({
                     </div>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--color-text-main)', lineHeight: 1.2 }}>
-                        Milo & Buttercup
+                        Every animal deserves a hand
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
-                        {currentCityObj.sector} (Intake #2891)
+                        A community starts with one person
                       </div>
                     </div>
                   </div>
-                  <span style={{ 
-                    fontSize: '10px', 
-                    fontWeight: 800, 
-                    textTransform: 'uppercase', 
-                    background: 'var(--color-surface-container)', 
-                    color: 'var(--color-primary)', 
-                    padding: '3px 8px', 
-                    borderRadius: 'var(--radius-full)' 
-                  }}>
-                    Cleared
-                  </span>
+                  <span className="photo-credit">WOOF community</span>
                 </div>
               </div>
 
@@ -188,7 +141,7 @@ export default function EmergencyHub({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--color-primary)' }}>badge</span>
                     <span style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--color-primary)' }}>
-                      Responder Portal Sign-In
+                      For community responders
                     </span>
                   </div>
                   <button 
@@ -201,11 +154,11 @@ export default function EmergencyHub({
                 </div>
 
                 <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 10px 0' }}>
-                  Sign in to claim rescue reports and update your assigned case.
+                  Sign in to volunteer for a report and share case updates. Accounts are community sign-ins, not professional credentials.
                 </p>
 
                 <button type="button" className="btn-primary" onClick={onOpenLoginPass} style={{ width: '100%', minHeight: '38px', fontSize: '12.5px' }}>
-                  Open secure responder sign-in
+                  Responder sign-in
                   <ArrowRight size={14} />
                 </button>
               </div>
@@ -214,74 +167,29 @@ export default function EmergencyHub({
         </div>
       </section>
 
-      {/* ==========================================================================
-          STITCH 4-CARD REAL-TIME TELEMETRY STRIP
-          ========================================================================== */}
+      {/* A clear explanation of what people can do */}
       <section className="stitch-metrics-section">
         <div className="site-container">
-          <div className="stitch-metrics-grid">
-            {/* Metric 1 */}
+          <div className="section-intro">
+            <span className="eyebrow">A practical place to start</span>
+            <h2>Small steps, shared locally.</h2>
+            <p>WOOF helps people nearby find each other and the care an animal may need.</p>
+          </div>
+          <div className="stitch-metrics-grid how-it-works-grid">
             <div className="stitch-metric-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-subtle)' }}>
-                  Field Units En-Route
-                </span>
-                <span className="live-pulse-dot" style={{ backgroundColor: '#ba1a1a', width: '7px', height: '7px' }}></span>
-              </div>
-              <div className="stitch-metric-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                18 <span style={{ fontSize: '14px', color: 'var(--color-secondary)', fontWeight: 700 }}>Active</span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                4 critical triage calls underway
-              </p>
+              <span className="step-number">01</span>
+              <h3>Share what you see</h3>
+              <p>Add a description, where the animal is, and a photo if it’s safe to take one.</p>
             </div>
-
-            {/* Metric 2 */}
-            <div className="stitch-metric-card" style={{ background: 'rgba(255, 219, 207, 0.25)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-subtle)' }}>
-                  Avg Arrival Window
-                </span>
-                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--color-secondary)' }}>bolt</span>
-              </div>
-              <div className="stitch-metric-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                14 <span style={{ fontSize: '14px', color: 'var(--color-primary)', fontWeight: 700 }}>minutes</span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                From first alert to on-site arrival
-              </p>
-            </div>
-
-            {/* Metric 3 */}
             <div className="stitch-metric-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-subtle)' }}>
-                  Partner Clinics
-                </span>
-                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--color-primary)' }}>local_hospital</span>
-              </div>
-              <div className="stitch-metric-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                142 <span style={{ fontSize: '14px', color: 'var(--color-primary)', fontWeight: 700 }}>Hubs</span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                Live telemetry surge-beds ready
-              </p>
+              <span className="step-number">02</span>
+              <h3>Reach people nearby</h3>
+              <p>Your report appears in the community feed so local responders can see it.</p>
             </div>
-
-            {/* Metric 4 */}
-            <div className="stitch-metric-card" style={{ background: 'rgba(174, 242, 194, 0.25)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-primary)' }}>
-                  Certified Volunteers
-                </span>
-                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--color-primary)' }}>group</span>
-              </div>
-              <div className="stitch-metric-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                3,420 <span style={{ fontSize: '14px', color: 'var(--color-primary)', fontWeight: 700 }}>Vetted</span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                Transporters, fosters, & leads
-              </p>
+            <div className="stitch-metric-card">
+              <span className="step-number">03</span>
+              <h3>Find a next step</h3>
+              <p>Browse local clinics and shelters, or follow updates as the community responds.</p>
             </div>
           </div>
         </div>
@@ -297,10 +205,10 @@ export default function EmergencyHub({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 800, color: 'var(--color-primary)' }}>
-                  Verified Emergency Facilities & Ambulances
+                  Animal care near you
                 </h2>
                 <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)' }}>
-                  Direct ambulance hotlines and trauma bays in <strong>{currentCityObj.name}</strong>
+                  Contact details for animal-care organizations in <strong>{currentCityObj.name}</strong>. Please call ahead to confirm availability.
                 </p>
               </div>
 
@@ -329,7 +237,7 @@ export default function EmergencyHub({
                 className={`filter-chip ${filterType === 'vet' ? 'active' : ''}`}
                 onClick={() => setFilterType('vet')}
               >
-                🚑 24/7 Trauma Bays & Ambulances
+                🚑 Veterinary care
               </button>
               <button 
                 className={`filter-chip ${filterType === 'shelter' ? 'active' : ''}`}

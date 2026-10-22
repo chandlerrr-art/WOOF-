@@ -1,6 +1,6 @@
 import React from 'react';
 import { CITIES } from '../data/mockData';
-import { Heart, ShieldCheck, Phone, Radio, Users } from 'lucide-react';
+import { Heart, ShieldCheck } from 'lucide-react';
 
 export default function Footer({ onNavigateTab, onOpenReport }) {
   return (
@@ -11,11 +11,11 @@ export default function Footer({ onNavigateTab, onOpenReport }) {
           <div className="footer-brand">
             <h2>WOOF India Connect</h2>
             <p>
-              An open-source emergency connecting platform uniting citizens who find stray animals in distress with verified 24/7 veterinary trauma bays, ambulances, and local community volunteer networks.
+              A community tool for sharing animal-in-need reports, finding local care, and keeping neighbours in the loop.
             </p>
             <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#5eead4' }}>
               <ShieldCheck size={16} />
-              <span>100% Free Public Utility • Zero Commissions</span>
+              <span>Community-powered • Open to everyone</span>
             </div>
           </div>
 
@@ -25,7 +25,7 @@ export default function Footer({ onNavigateTab, onOpenReport }) {
             <ul className="footer-links">
               <li>
                 <a href="#report" onClick={(e) => { e.preventDefault(); onOpenReport(); }}>
-                  🚨 Broadcast Animal SOS
+                  Share an animal-in-need report
                 </a>
               </li>
               <li>
@@ -35,12 +35,12 @@ export default function Footer({ onNavigateTab, onOpenReport }) {
               </li>
               <li>
                 <a href="#community" onClick={(e) => { e.preventDefault(); onNavigateTab('community'); }}>
-                  👥 Community Rescuer Grid
+                  👥 Community reports
                 </a>
               </li>
               <li>
                 <a href="#tracker" onClick={(e) => { e.preventDefault(); onNavigateTab('tracker'); }}>
-                  🛰️ Case Status Tracker
+                  🛰️ Report updates
                 </a>
               </li>
             </ul>
@@ -62,7 +62,7 @@ export default function Footer({ onNavigateTab, onOpenReport }) {
           <div className="footer-col">
             <h4>Connecting Model</h4>
             <p style={{ fontSize: '12.5px', lineHeight: '1.5', color: '#64748b' }}>
-              WOOF operates as an emergency routing and coordination directory. We do not operate proprietary physical shelters or ambulance fleets. We direct calls to certified third-party NGOs and community volunteers.
+              WOOF is a community coordination tool, not an ambulance or shelter service. Listings and responder accounts are not professional endorsements; contact organizations directly and confirm availability.
             </p>
           </div>
         </div>

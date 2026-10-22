@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CITIES } from '../data/mockData';
-import { Phone, Radio, Users, Compass, Menu, X, ShieldAlert, HeartHandshake, User, CheckCircle2, ShieldCheck, KeyRound } from 'lucide-react';
+import { Menu, X, KeyRound } from 'lucide-react';
 
 export default function Navbar({
   activeCity,
@@ -23,29 +23,23 @@ export default function Navbar({
 
   return (
     <>
-      {/* Stitch Top Operational Ticker Bar */}
+      {/* A concise description of the community feed */}
       <div className="stitch-ticker-bar">
         <div className="stitch-ticker-content">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-main)' }}>
-            <span className="live-pulse-dot" style={{ backgroundColor: '#ba1a1a' }}></span>
             <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#005c65', letterSpacing: '0.05em' }}>
-              Live Rapid Response Ticker
+              Neighbourhood animal care
             </span>
             <span style={{ color: 'var(--color-border)', margin: '0 4px' }}>•</span>
             <span style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
-              {currentCityObj.sector} Alert: Canine emergency transport active • ETA 6 mins
+              Reports, local services, and community support in {currentCityObj.name}
             </span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12.5px' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-primary)', fontWeight: 700 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--color-secondary)' }}>verified_user</span>
-              Verified Response Network
-            </span>
-            <span style={{ color: 'var(--color-border)' }}>|</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-text-muted)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--color-primary)' }}>radio_button_checked</span>
-              99.8% Triage SLA Met
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--color-secondary)' }}>favorite</span>
+              Neighbours helping neighbours
             </span>
           </div>
         </div>
@@ -62,16 +56,16 @@ export default function Navbar({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>
-                  HavenPulse WOOF
+                  WOOF
                 </span>
                 <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '0.04em', marginTop: '3px' }}>
-                  Emergency Rescue & Dispatch
+                  Neighbourhood animal care
                 </span>
               </div>
             </div>
 
             {/* Stitch Pill Navigation Dock */}
-            <nav className="stitch-nav-dock">
+            <nav className="stitch-nav-dock" aria-label="Main navigation">
               <button 
                 className={`stitch-nav-btn ${activeTab === 'hub' ? 'active' : ''}`}
                 onClick={() => handleNavClick('hub')}
@@ -83,7 +77,7 @@ export default function Navbar({
                 className={`stitch-nav-btn ${activeTab === 'tracker' ? 'active' : ''}`}
                 onClick={() => handleNavClick('tracker')}
               >
-                Rescue Map & Triage
+                Reports & updates
               </button>
 
               <button 
@@ -91,7 +85,7 @@ export default function Navbar({
                 onClick={() => handleNavClick('community')}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                Field Missions
+                Community reports
                 {openIncidentsCount > 0 && (
                   <span style={{ 
                     background: 'var(--color-secondary)', 
@@ -110,7 +104,7 @@ export default function Navbar({
                 className={`stitch-nav-btn ${activeTab === 'directory' ? 'active' : ''}`}
                 onClick={() => handleNavClick('directory')}
               >
-                Shelter Directory
+                Find local care
               </button>
             </nav>
 
@@ -120,6 +114,7 @@ export default function Navbar({
               <select 
                 value={activeCity}
                 onChange={(e) => setActiveCity(e.target.value)}
+                aria-label="Choose city"
                 style={{
                   padding: '7px 12px',
                   borderRadius: 'var(--radius-full)',
@@ -191,6 +186,7 @@ export default function Navbar({
               <button 
                 className="btn-stitch-sos"
                 onClick={onOpenReport}
+                aria-label="Report an emergency"
               >
                 <span className="live-pulse-dot" style={{ backgroundColor: '#ba1a1a', width: '7px', height: '7px' }}></span>
                 <span>Report Emergency</span>
@@ -200,6 +196,8 @@ export default function Navbar({
               <button 
                 className="mobile-menu-btn"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={mobileMenuOpen}
                 style={{ marginLeft: '4px' }}
               >
                 {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -230,21 +228,21 @@ export default function Navbar({
               onClick={() => handleNavClick('tracker')}
               style={{ textAlign: 'left', borderRadius: 'var(--radius-md)' }}
             >
-              Rescue Map & Triage
+              Reports & updates
             </button>
             <button 
               className={`stitch-nav-btn ${activeTab === 'community' ? 'active' : ''}`}
               onClick={() => handleNavClick('community')}
               style={{ textAlign: 'left', borderRadius: 'var(--radius-md)' }}
             >
-              Field Missions ({openIncidentsCount} Open)
+              Community reports ({openIncidentsCount} open)
             </button>
             <button 
               className={`stitch-nav-btn ${activeTab === 'directory' ? 'active' : ''}`}
               onClick={() => handleNavClick('directory')}
               style={{ textAlign: 'left', borderRadius: 'var(--radius-md)' }}
             >
-              Shelter & Clinic Directory
+              Find local care
             </button>
             <button 
               onClick={() => { onOpenLoginPass(); setMobileMenuOpen(false); }}
