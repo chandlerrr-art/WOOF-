@@ -156,7 +156,7 @@ export default function Navbar({
                     border: '1px solid var(--color-primary-fixed-dim)',
                     cursor: 'pointer'
                   }}
-                  title="View Verified Responder Pass"
+                  title="View community responder account"
                 >
                   <img 
                     src={currentPass.avatar} 

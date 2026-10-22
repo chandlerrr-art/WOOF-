@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import Navbar from './components/Navbar';
 import EmergencyHub from './components/EmergencyHub';
 import ReportIntake from './components/ReportIntake';
@@ -8,207 +9,232 @@ import FirstAidModal from './components/FirstAidModal';
 import LoginPassModal from './components/LoginPassModal';
 import Footer from './components/Footer';
 import { INITIAL_TICKETS } from './data/mockData';
-import { RotateCcw } from 'lucide-react';
+import {
+  advanceRescueReport,
+  claimRescueReport,
+  createRescueReport,
+  fetchRescueReports,
+  supabase,
+  supabaseConfigurationError,
+} from './lib/supabase';
 
 export default function App() {
   const [activeCity, setActiveCity] = useState('bengaluru');
-  const [activeTab, setActiveTab] = useState('hub'); // 'hub' | 'community' | 'tracker' | 'directory'
+  const [activeTab, setActiveTab] = useState('hub');
   const [firstAidGuide, setFirstAidGuide] = useState(null);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [loginPassModalOpen, setLoginPassModalOpen] = useState(false);
-
-  // Authenticated Responder Pass stored in localStorage
-  const [currentPass, setCurrentPass] = useState(() => {
-    try {
-      const saved = localStorage.getItem('woof_responder_pass');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Could not load pass from localStorage', e);
-    }
-    return null;
-  });
-
-  // Tickets stored in localStorage with INITIAL_TICKETS fallback
+  const [user, setUser] = useState(null);
   const [tickets, setTickets] = useState(() => {
+    if (supabase) return [];
     try {
       const saved = localStorage.getItem('woof_rescue_tickets');
       if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Could not load tickets from localStorage', e);
+    } catch (error) {
+      console.error('Could not load demo tickets from localStorage', error);
     }
     return INITIAL_TICKETS;
   });
-
-  const [selectedTicketId, setSelectedTicketId] = useState(() => {
-    return tickets[0]?.id || 'RES-8492';
-  });
+  const [selectedTicketId, setSelectedTicketId] = useState('');
+  const [backendError, setBackendError] = useState('');
+  const [actionError, setActionError] = useState('');
 
   useEffect(() => {
+    if (supabase) return;
     try {
       localStorage.setItem('woof_rescue_tickets', JSON.stringify(tickets));
-    } catch (e) {
-      console.error('Could not save tickets to localStorage', e);
+    } catch (error) {
+      console.error('Could not save demo tickets to localStorage', error);
     }
   }, [tickets]);
 
   useEffect(() => {
-    try {
-      if (currentPass) {
-        localStorage.setItem('woof_responder_pass', JSON.stringify(currentPass));
-      } else {
-        localStorage.removeItem('woof_responder_pass');
-      }
-    } catch (e) {
-      console.error('Could not save pass to localStorage', e);
-    }
-  }, [currentPass]);
+    if (!supabase) return undefined;
+    let active = true;
 
-  // Handle Login Pass Authenticated
-  const handleLoginSuccess = (passData) => {
-    setCurrentPass(passData);
-  };
-
-  const handleFastLoginRole = (role) => {
-    const rolesMap = {
-      'Field Unit': {
-        name: 'Rajesh Kumar',
-        role: 'Field Rescue Operative',
-        badgeId: 'FIELD-BLR-104',
-        sector: 'East Bengaluru Grid',
-        vehicle: 'Two-Wheeler First Response Kit',
-        status: 'Verified Level 2 Medic',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-        color: '#1b5e3a'
-      },
-      'Dispatcher': {
-        name: 'Priya Sundaram',
-        role: 'Emergency Dispatch Coordinator',
-        badgeId: 'DISPATCH-HQ-09',
-        sector: 'Central Metro Operations',
-        vehicle: 'Command Desk Telemetry',
-        status: 'Lead Operations Officer',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-        color: '#e65100'
-      },
-      'Vet Clinic': {
-        name: 'Dr. Sameer Patil, MVSc',
-        role: 'Emergency Veterinary Surgeon',
-        badgeId: 'VET-CUPA-042',
-        sector: 'Trauma & Casualty Bay',
-        vehicle: 'Surgical ICU Ambulance',
-        status: 'Accredited Veterinary Surgeon',
-        avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=200&q=80',
-        color: '#00838f'
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        setBackendError(`Could not restore your sign-in: ${error.message}`);
+        return;
       }
+      setUser(data.session?.user || null);
+    });
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
     };
-    setCurrentPass(rolesMap[role] || rolesMap['Field Unit']);
-  };
+  }, []);
 
-  // Handle new report submission
-  const handleNewReport = (newTicket) => {
-    setTickets([newTicket, ...tickets]);
-    setSelectedTicketId(newTicket.id);
+  const loadTickets = useCallback(async () => {
+    if (!supabase) return;
+    try {
+      const nextTickets = await fetchRescueReports(user?.id);
+      setTickets(nextTickets);
+      setBackendError('');
+      setSelectedTicketId((currentId) => (
+        nextTickets.some((ticket) => ticket.id === currentId)
+          ? currentId
+          : nextTickets[0]?.id || ''
+      ));
+    } catch (error) {
+      console.error('Could not load rescue reports', error);
+      setBackendError(`Could not load rescue reports: ${error.message}`);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+    let active = true;
+    queueMicrotask(() => {
+      if (active) loadTickets();
+    });
+    const channel = supabase
+      .channel('rescue-reports')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rescue_reports' }, loadTickets)
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setBackendError(`Live updates are unavailable (${status}).`);
+        }
+      });
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, [loadTickets]);
+
+  const currentPass = user ? {
+    name: user.user_metadata?.display_name || user.email,
+    role: 'Community responder',
+    badgeId: `WOOF-${user.id.slice(0, 8).toUpperCase()}`,
+    sector: 'Community rescue network',
+    status: 'Account active · not independently verified',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+    color: '#1b5e3a',
+  } : null;
+
+  const handleNewReport = async (newTicket) => {
+    let savedTicket;
+    if (supabase) {
+      savedTicket = await createRescueReport(newTicket);
+      await loadTickets();
+    } else {
+      savedTicket = { ...newTicket, photoFile: undefined };
+      setTickets((currentTickets) => [savedTicket, ...currentTickets]);
+    }
+    setSelectedTicketId(savedTicket.id);
     setReportModalOpen(false);
     setActiveTab('tracker');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle volunteer claiming / offering help
-  const handleClaimTicket = (ticketId) => {
-    setTickets(tickets.map(t => {
-      if (t.id === ticketId) {
-        return {
-          ...t,
-          status: 'connected',
-          connectedResponder: currentPass ? {
-            name: `${currentPass.name} (${currentPass.role})`,
-            role: currentPass.status,
-            phone: '+91 98860 99881',
-            eta: '8 mins away',
-            action: `Claimed by ${currentPass.badgeId} • Heading to incident`
-          } : {
-            name: 'Rajesh Kumar (Volunteer Rescuer)',
-            role: 'Community First Responder with Bike Carrier',
-            phone: '+91 98860 99881',
-            eta: '8 mins away',
-            action: 'Heading to site with transport crate & muzzle'
-          },
-          timeline: [
-            { time: 'Just now', event: `Mission claimed by ${currentPass?.name || 'Volunteer Rajesh Kumar'}`, actor: currentPass?.name || 'Rajesh Kumar' },
-            ...(t.timeline || [])
-          ]
-        };
-      }
-      return t;
-    }));
-  };
-
-  // Handle advancing connection status
-  const handleUpdateTicketStatus = (ticketId, nextStatus) => {
-    setTickets(tickets.map(t => {
-      if (t.id === ticketId) {
-        return {
-          ...t,
-          status: nextStatus,
-          timeline: [
-            { time: 'Just now', event: `Status updated to ${nextStatus.toUpperCase()}`, actor: currentPass?.name || 'Community Rescuer' },
-            ...(t.timeline || [])
-          ]
-        };
-      }
-      return t;
-    }));
-  };
-
-  // Reset Demo Data
-  const handleResetData = () => {
-    if (window.confirm('Reset WOOF database back to initial community distress tickets?')) {
-      setTickets(INITIAL_TICKETS);
-      setSelectedTicketId('RES-8492');
-      setCurrentPass(null);
-      localStorage.removeItem('woof_rescue_tickets');
-      localStorage.removeItem('woof_responder_pass');
+  const handleClaimTicket = async (ticketId) => {
+    if (!supabase) {
+      setTickets((currentTickets) => currentTickets.map((ticket) => (
+        ticket.id === ticketId
+          ? { ...ticket, status: 'connected', connectedResponder: { name: 'Demo volunteer', role: 'Demo mode', phone: '', eta: 'Contact the reporter for an ETA' } }
+          : ticket
+      )));
+      return;
+    }
+    if (!user) {
+      setLoginPassModalOpen(true);
+      return;
+    }
+    try {
+      setActionError('');
+      await claimRescueReport(ticketId);
+      await loadTickets();
+    } catch (error) {
+      console.error('Could not claim rescue report', error);
+      setActionError(error.message);
     }
   };
 
-  const openCount = tickets.filter(t => ['reported', 'broadcasted'].includes(t.status)).length;
+  const handleUpdateTicketStatus = async (ticketId, nextStatus) => {
+    if (!supabase) {
+      setTickets((currentTickets) => currentTickets.map((ticket) => (
+        ticket.id === ticketId ? { ...ticket, status: nextStatus } : ticket
+      )));
+      return;
+    }
+    if (!user) {
+      setLoginPassModalOpen(true);
+      return;
+    }
+    try {
+      setActionError('');
+      await advanceRescueReport(ticketId, nextStatus);
+      await loadTickets();
+    } catch (error) {
+      console.error('Could not update rescue report status', error);
+      setActionError(error.message);
+    }
+  };
+
+  const handleResetData = () => {
+    if (window.confirm('Reset WOOF demo tickets on this browser?')) {
+      setTickets(INITIAL_TICKETS);
+      setSelectedTicketId(INITIAL_TICKETS[0]?.id || '');
+      localStorage.removeItem('woof_rescue_tickets');
+    }
+  };
+
+  const openCount = tickets.filter((ticket) => ['reported', 'broadcasted'].includes(ticket.status)).length;
+  const openLogin = () => setLoginPassModalOpen(true);
 
   return (
     <div className="site-wrapper">
-      {/* Stitch Modern Website Header with Portal Login Pass */}
-      <Navbar 
+      <Navbar
         activeCity={activeCity}
         setActiveCity={setActiveCity}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenReport={() => setReportModalOpen(true)}
-        onOpenLoginPass={() => setLoginPassModalOpen(true)}
+        onOpenLoginPass={openLogin}
         currentPass={currentPass}
         openIncidentsCount={openCount}
       />
 
-      {/* Main Website Content Views */}
       <main style={{ flex: 1 }}>
+        {!supabase && (
+          <div role="status" style={{ padding: '10px 20px', textAlign: 'center', background: '#fff7ed', color: '#9a3412', fontSize: '13px' }}>
+            {supabaseConfigurationError || 'Demo mode: configure Supabase to share reports between visitors.'}
+          </div>
+        )}
+        {(backendError || actionError) && (
+          <div role="alert" style={{ padding: '10px 20px', textAlign: 'center', background: '#fef2f2', color: '#991b1b', fontSize: '13px' }}>
+            {actionError || backendError}
+            <button type="button" onClick={() => { setActionError(''); setBackendError(''); }} style={{ marginLeft: '10px', textDecoration: 'underline' }}>
+              Dismiss
+            </button>
+          </div>
+        )}
         {(activeTab === 'hub' || activeTab === 'directory') && (
-          <EmergencyHub 
+          <EmergencyHub
             activeCity={activeCity}
             onOpenReport={() => setReportModalOpen(true)}
             onNavigateTab={(tab) => {
               setActiveTab(tab);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            onOpenFirstAid={(guide) => setFirstAidGuide(guide)}
-            onOpenLoginPass={() => setLoginPassModalOpen(true)}
-            onFastLoginRole={handleFastLoginRole}
+            onOpenFirstAid={setFirstAidGuide}
+            onOpenLoginPass={openLogin}
           />
         )}
 
         {activeTab === 'community' && (
-          <DispatcherBoard 
+          <DispatcherBoard
             tickets={tickets}
             activeCity={activeCity}
             onClaimTicket={handleClaimTicket}
             onUpdateTicketStatus={handleUpdateTicketStatus}
+            isAuthenticated={!supabase || Boolean(user)}
+            onRequireSignIn={openLogin}
             onSelectTicketAndTrack={(id) => {
               setSelectedTicketId(id);
               setActiveTab('tracker');
@@ -218,35 +244,28 @@ export default function App() {
         )}
 
         {activeTab === 'tracker' && (
-          <LiveTracker 
+          <LiveTracker
             tickets={tickets}
             selectedTicketId={selectedTicketId}
             onSelectTicket={setSelectedTicketId}
+            onClaimTicket={handleClaimTicket}
             onUpdateTicketStatus={handleUpdateTicketStatus}
+            isAuthenticated={!supabase || Boolean(user)}
+            onRequireSignIn={openLogin}
           />
         )}
 
-        {/* Demo Incidents Reset Bar */}
-        <div style={{ padding: '24px 0', textAlign: 'center', opacity: 0.75 }}>
-          <button 
-            onClick={handleResetData}
-            style={{ 
-              fontSize: '11.5px', 
-              fontWeight: 600,
-              color: 'var(--color-text-subtle)', 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: '4px' 
-            }}
-          >
-            <RotateCcw size={12} />
-            Reset Demo Incidents & Pass
-          </button>
-        </div>
+        {!supabase && (
+          <div style={{ padding: '24px 0', textAlign: 'center', opacity: 0.75 }}>
+            <button onClick={handleResetData} style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--color-text-subtle)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <RotateCcw size={12} />
+              Reset Demo Incidents
+            </button>
+          </div>
+        )}
       </main>
 
-      {/* Website Footer */}
-      <Footer 
+      <Footer
         onNavigateTab={(tab) => {
           setActiveTab(tab);
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -254,11 +273,10 @@ export default function App() {
         onOpenReport={() => setReportModalOpen(true)}
       />
 
-      {/* Emergency SOS Report Modal (Overlay on Website) */}
       {reportModalOpen && (
         <div className="modal-backdrop" onClick={() => setReportModalOpen(false)}>
-          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
-            <ReportIntake 
+          <div className="modal-sheet" onClick={(event) => event.stopPropagation()}>
+            <ReportIntake
               activeCity={activeCity}
               onSubmitReport={handleNewReport}
               onCancel={() => setReportModalOpen(false)}
@@ -267,19 +285,18 @@ export default function App() {
         </div>
       )}
 
-      {/* Responder Portal Login Pass Modal */}
-      <LoginPassModal 
+      <LoginPassModal
         isOpen={loginPassModalOpen}
         onClose={() => setLoginPassModalOpen(false)}
         currentPass={currentPass}
-        onLoginSuccess={handleLoginSuccess}
+        isBackendConfigured={Boolean(supabase)}
+        onSignOut={async () => {
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
+        }}
       />
 
-      {/* Emergency First Aid Modal */}
-      <FirstAidModal 
-        guide={firstAidGuide}
-        onClose={() => setFirstAidGuide(null)}
-      />
+      <FirstAidModal guide={firstAidGuide} onClose={() => setFirstAidGuide(null)} />
     </div>
   );
 }

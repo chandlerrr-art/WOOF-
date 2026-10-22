@@ -3,83 +3,71 @@ import confetti from 'canvas-confetti';
 import { Camera, MapPin, AlertTriangle, ShieldCheck, ArrowRight, ArrowLeft, Upload, Check, Share2, Sparkles, Phone, Radio, Users } from 'lucide-react';
 import { CITIES, VERIFIED_CENTERS } from '../data/mockData';
 
-const SAMPLE_PHOTOS = [
-  {
-    title: 'Indie Dog (Road trauma)',
-    url: 'https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&w=600&q=80',
-    type: 'Indie Dog (Desi)'
-  },
-  {
-    title: 'Gully Kitten in drain',
-    url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80',
-    type: 'Stray Kitten'
-  },
-  {
-    title: 'Puppies in waterlogging',
-    url: 'https://images.unsplash.com/photo-1591160674255-ed8b9b7759a9?auto=format&fit=crop&w=600&q=80',
-    type: 'Litter of Puppies'
-  }
-];
-
 export default function ReportIntake({ activeCity, onSubmitReport, onCancel }) {
   const currentCityObj = CITIES.find(c => c.id === activeCity) || CITIES[0];
 
   const [step, setStep] = useState(1);
   const [species, setSpecies] = useState('Indie Dog (Desi)');
   const [urgency, setUrgency] = useState('critical');
-  const [photoUrl, setPhotoUrl] = useState(SAMPLE_PHOTOS[0].url);
-  const [notes, setNotes] = useState('Stray dog hit by vehicle on main road, bleeding from hind leg. Need volunteer transport or ambulance to hospital.');
-  const [locationName, setLocationName] = useState(`Near Indiranagar Metro Pillar 42, ${currentCityObj.name}`);
-  const [landmark, setLandmark] = useState('Beside Chai Point on pedestrian footpath');
-  const [reporterName, setReporterName] = useState('Ananya Sen (Citizen)');
-  const [reporterPhone, setReporterPhone] = useState('+91 98765 43210');
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoFile, setPhotoFile] = useState(null);
+  const [notes, setNotes] = useState('');
+  const [locationName, setLocationName] = useState('');
+  const [landmark, setLandmark] = useState('');
+  const [reporterName, setReporterName] = useState('');
+  const [reporterPhone, setReporterPhone] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsCoordinates, setGpsCoordinates] = useState(null);
+  const [submissionError, setSubmissionError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   // Closest verified emergency facility in this city
   const closestCenter = VERIFIED_CENTERS.find(c => c.cityId === activeCity) || VERIFIED_CENTERS[0];
 
   const handleCaptureGPS = () => {
+    if (!navigator.geolocation) {
+      setSubmissionError('This browser does not support location detection.');
+      return;
+    }
     setGpsLoading(true);
-    setTimeout(() => {
-      setGpsLoading(false);
-      if (activeCity === 'bengaluru') {
-        setLocationName('100ft Road, HAL 2nd Stage, Indiranagar, Bengaluru');
-        setLandmark('Opposite Metro Pillar 42, near BDA Complex');
-      } else if (activeCity === 'delhi') {
-        setLocationName('Flyover Market, Defence Colony, New Delhi');
-        setLandmark('Near Pillar 18 underpass, Block A market gate');
-      } else if (activeCity === 'mumbai') {
-        setLocationName('Carter Road Promenade, Bandra West, Mumbai');
-        setLandmark('Opposite Cafe Coffee Day seawall entrance');
-      } else {
-        setLocationName(`Central Junction, ${currentCityObj.sector}`);
-        setLandmark('Near Bus Depot & Main Signal');
-      }
-    }, 600);
+    setSubmissionError('');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const coordinates = { lat: coords.latitude, lng: coords.longitude };
+        setGpsCoordinates(coordinates);
+        setLocationName(`GPS ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)} — ${currentCityObj.name}`);
+        setGpsLoading(false);
+      },
+      (error) => {
+        setGpsLoading(false);
+        setSubmissionError(`Could not get your location: ${error.message}`);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
   };
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+        setSubmissionError('Choose a JPEG, PNG, or WebP photo smaller than 5 MB.');
+        setPhotoFile(null);
+        setPhotoUrl('');
+        e.target.value = '';
+        return;
+      }
       const objectUrl = URL.createObjectURL(file);
       setPhotoUrl(objectUrl);
+      setPhotoFile(file);
+      setSubmissionError('');
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    try {
-      confetti({
-        particleCount: 80,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-    } catch (err) {}
-
-    const randomId = 'RES-' + Math.floor(1000 + Math.random() * 9000);
+    setSubmissionError('');
+    setSubmitting(true);
     const newTicket = {
-      id: randomId,
       cityId: activeCity,
       title: `${urgency === 'critical' ? 'CRITICAL: ' : ''}${species} Distress Alert`,
       species,
@@ -87,26 +75,34 @@ export default function ReportIntake({ activeCity, onSubmitReport, onCancel }) {
       status: 'broadcasted',
       timestamp: 'Just now',
       location: locationName,
-      lat: 12.9716,
-      lng: 77.5946,
+      lat: gpsCoordinates?.lat ?? null,
+      lng: gpsCoordinates?.lng ?? null,
       landmark,
       reportedBy: reporterName,
       reporterPhone,
       notes,
       photo: photoUrl,
-      connectedResponder: null, // Open for community volunteers to connect
+      photoFile,
+      connectedResponder: null,
       nearestFacility: {
         name: closestCenter.name,
         phone: closestCenter.ambulancePhone,
         distance: closestCenter.distance
       },
       timeline: [
-        { time: 'Just now', event: 'SOS Broadcast logged by citizen finder', actor: reporterName },
-        { time: 'Just now', event: `Shared to ${currentCityObj.name} Volunteer Rescue Grid`, actor: 'WOOF Connector' }
+        { time: 'Just now', event: 'SOS broadcast logged by citizen finder', actor: 'Citizen reporter' },
+        { time: 'Just now', event: `Shared to ${currentCityObj.name} volunteer rescue grid`, actor: 'WOOF Connector' }
       ]
     };
 
-    onSubmitReport(newTicket);
+    try {
+      await onSubmitReport(newTicket);
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+    } catch (error) {
+      setSubmissionError(`Could not submit rescue report: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Pre-formatted WhatsApp SOS card
@@ -260,11 +256,17 @@ export default function ReportIntake({ activeCity, onSubmitReport, onCancel }) {
               marginBottom: '10px',
               border: '1.5px solid var(--color-border)'
             }}>
-              <img 
-                src={photoUrl} 
-                alt="Selected evidence" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt="Selected evidence"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--color-text-muted)', fontSize: '13px' }}>
+                  No photo selected (optional)
+                </div>
+              )}
               <div style={{ 
                 position: 'absolute', 
                 bottom: '10px', 
@@ -277,37 +279,6 @@ export default function ReportIntake({ activeCity, onSubmitReport, onCancel }) {
                 fontWeight: 600 
               }}>
                 Evidence Photo
-              </div>
-            </div>
-
-            {/* Quick Demo Sample Selector */}
-            <div style={{ marginBottom: '12px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text-muted)' }}>
-                Demo Quick Selector (Preset Photos):
-              </span>
-              <div style={{ display: 'flex', gap: '6px', marginTop: '4px', overflowX: 'auto', paddingBottom: '4px' }}>
-                {SAMPLE_PHOTOS.map((sample, i) => (
-                  <button
-                    type="button"
-                    key={i}
-                    onClick={() => {
-                      setPhotoUrl(sample.url);
-                      setSpecies(sample.type);
-                    }}
-                    style={{
-                      fontSize: '11px',
-                      padding: '5px 12px',
-                      borderRadius: 'var(--radius-full)',
-                      border: photoUrl === sample.url ? '1.5px solid var(--color-primary)' : '1.5px solid var(--color-border)',
-                      background: photoUrl === sample.url ? 'var(--color-primary-bg)' : '#ffffff',
-                      color: photoUrl === sample.url ? 'var(--color-primary-dark)' : 'var(--color-text-main)',
-                      whiteSpace: 'nowrap',
-                      fontWeight: 700
-                    }}
-                  >
-                    {sample.title}
-                  </button>
-                ))}
               </div>
             </div>
 
@@ -339,6 +310,7 @@ export default function ReportIntake({ activeCity, onSubmitReport, onCancel }) {
           </div>
 
           <div className="form-group">
+            {submissionError && <div role="alert" style={{ color: '#b91c1c', fontSize: '13px' }}>{submissionError}</div>}
             <label className="form-label">
               <span>Condition & Situation Notes</span>
             </label>
@@ -455,13 +427,15 @@ export default function ReportIntake({ activeCity, onSubmitReport, onCancel }) {
 
           {/* Submission Triggers */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+            {submissionError && <div role="alert" style={{ color: '#b91c1c', fontSize: '13px' }}>{submissionError}</div>}
             <button 
               type="submit"
               className="btn-emergency-trigger"
               style={{ height: '52px' }}
+              disabled={submitting}
             >
               <Radio size={20} />
-              Post Distress Call to Community Grid
+              {submitting ? 'Posting rescue report…' : 'Post Distress Call to Community Grid'}
             </button>
 
             <a 

@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 import { VERIFIED_CENTERS, FIRST_AID_GUIDES, CITIES } from '../data/mockData';
-import { Phone, Navigation, AlertCircle, ArrowRight, CheckCircle2, HeartPulse, Radio, Search, ShieldCheck, Timer, Star, LogIn, BadgeAlert, Sparkles, KeyRound } from 'lucide-react';
+import { Phone, Navigation, AlertCircle, ArrowRight, CheckCircle2, HeartPulse, Radio, Search, ShieldCheck, Timer, Star, BadgeAlert, Sparkles } from 'lucide-react';
 
 export default function EmergencyHub({
   activeCity,
   onOpenReport,
   onNavigateTab,
   onOpenFirstAid,
-  onOpenLoginPass,
-  onFastLoginRole
+  onOpenLoginPass
 }) {
   const [filterType, setFilterType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRole, setSelectedRole] = useState('Dispatcher');
-  const [demoLoginStatus, setDemoLoginStatus] = useState(false);
 
   const currentCityObj = CITIES.find(c => c.id === activeCity) || CITIES[0];
 
@@ -25,15 +22,6 @@ export default function EmergencyHub({
       center.address.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCity && matchesType && matchesSearch;
   });
-
-  const handleDemoLogin = (e) => {
-    e.preventDefault();
-    setDemoLoginStatus(true);
-    setTimeout(() => {
-      onFastLoginRole(selectedRole);
-      onNavigateTab('community');
-    }, 600);
-  };
 
   return (
     <div>
@@ -194,7 +182,7 @@ export default function EmergencyHub({
                 </div>
               </div>
 
-              {/* Fast-Pass Responder Portal Login Mini-Card from Stitch */}
+              {/* Responder account entry */}
               <div className="responder-login-widget">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -208,63 +196,18 @@ export default function EmergencyHub({
                     onClick={onOpenLoginPass} 
                     style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--color-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}
                   >
-                    View All Passes →
+                    Sign in / create account →
                   </button>
                 </div>
 
                 <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 10px 0' }}>
-                  Access live telemetry dispatch, claim cases, or update clinic occupancy.
+                  Sign in to claim rescue reports and update your assigned case.
                 </p>
 
-                <form onSubmit={handleDemoLogin}>
-                  <div className="role-selector-row">
-                    {['Field Unit', 'Dispatcher', 'Vet Clinic'].map(role => (
-                      <button
-                        type="button"
-                        key={role}
-                        className={`role-pill-btn ${selectedRole === role ? 'active' : ''}`}
-                        onClick={() => setSelectedRole(role)}
-                      >
-                        {role}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                    <button 
-                      type="submit" 
-                      className="btn-primary"
-                      style={{ flex: 1, minHeight: '38px', fontSize: '12.5px', padding: '0 14px' }}
-                    >
-                      <LogIn size={14} />
-                      Enter Mission Center
-                    </button>
-                    <button 
-                      type="button"
-                      className="btn-secondary"
-                      style={{ minHeight: '38px', fontSize: '12px', padding: '0 12px' }}
-                      onClick={handleDemoLogin}
-                      title="Instant Fast-Pass Access"
-                    >
-                      ⚡ Fast-Pass
-                    </button>
-                  </div>
-                </form>
-
-                {demoLoginStatus && (
-                  <div style={{ 
-                    marginTop: '8px', 
-                    padding: '6px 12px', 
-                    borderRadius: 'var(--radius-full)', 
-                    background: '#dcfce7', 
-                    color: '#15803d', 
-                    fontSize: '11px', 
-                    fontWeight: 700, 
-                    textAlign: 'center' 
-                  }}>
-                    Authenticated as {selectedRole} • Opening Mission Center...
-                  </div>
-                )}
+                <button type="button" className="btn-primary" onClick={onOpenLoginPass} style={{ width: '100%', minHeight: '38px', fontSize: '12.5px' }}>
+                  Open secure responder sign-in
+                  <ArrowRight size={14} />
+                </button>
               </div>
             </div>
           </div>

@@ -7,7 +7,9 @@ export default function DispatcherBoard({
   activeCity,
   onClaimTicket,
   onUpdateTicketStatus,
-  onSelectTicketAndTrack
+  onSelectTicketAndTrack,
+  isAuthenticated,
+  onRequireSignIn,
 }) {
   const [filterUrgency, setFilterUrgency] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -129,7 +131,7 @@ export default function DispatcherBoard({
 
                 <div style={{ display: 'flex', gap: '14px' }}>
                   <img 
-                    src={ticket.photo} 
+                    src={ticket.photo || `${import.meta.env.BASE_URL}favicon.svg`}
                     alt={ticket.title}
                     style={{ 
                       width: '80px', 
@@ -202,16 +204,26 @@ export default function DispatcherBoard({
                     <button 
                       className="btn-primary"
                       style={{ fontSize: '12.5px', minHeight: '38px', padding: '0 14px' }}
-                      onClick={() => onClaimTicket(ticket.id)}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          onRequireSignIn();
+                          return;
+                        }
+                        onClaimTicket(ticket.id);
+                      }}
                     >
                       <UserCheck size={14} />
-                      I Can Help / Offer Transport
+                      {isAuthenticated ? 'I Can Help / Offer Transport' : 'Sign in to help'}
                     </button>
-                  ) : (
+                  ) : ticket.status !== 'resolved' ? (
                     <button 
                       className="btn-secondary"
                       style={{ fontSize: '12.5px', minHeight: '38px', padding: '0 12px' }}
                       onClick={() => {
+                        if (!isAuthenticated) {
+                          onRequireSignIn();
+                          return;
+                        }
                         const statuses = ['broadcasted', 'connected', 'help-arrived', 'at-facility', 'resolved'];
                         const nextIdx = (statuses.indexOf(ticket.status) + 1) % statuses.length;
                         onUpdateTicketStatus(ticket.id, statuses[nextIdx]);
@@ -219,19 +231,23 @@ export default function DispatcherBoard({
                     >
                       Advance Status
                     </button>
+                  ) : (
+                    <span className="status-pill in-progress">Resolved</span>
                   )}
 
-                  <a 
-                    href={`https://wa.me/${ticket.reporterPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${ticket.reportedBy}, I saw your animal distress call on WOOF Connect for Case #${ticket.id}. I am in the area and would like to assist.`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-whatsapp"
-                    style={{ fontSize: '12.5px', minHeight: '38px', padding: '0 12px' }}
-                    title="WhatsApp Citizen Finder"
-                  >
-                    <MessageSquare size={14} />
-                    WhatsApp
-                  </a>
+                  {ticket.reporterPhone && (
+                    <a
+                      href={`https://wa.me/${ticket.reporterPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${ticket.reportedBy}, I saw your animal distress call on WOOF Connect for Case #${ticket.id}. I am in the area and would like to assist.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-whatsapp"
+                      style={{ fontSize: '12.5px', minHeight: '38px', padding: '0 12px' }}
+                      title="WhatsApp Citizen Finder"
+                    >
+                      <MessageSquare size={14} />
+                      WhatsApp
+                    </a>
+                  )}
 
                   <button 
                     className="btn-secondary"

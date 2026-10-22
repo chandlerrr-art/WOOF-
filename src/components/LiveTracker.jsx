@@ -10,7 +10,15 @@ const CONNECTION_STEPS = [
   { id: 'resolved', label: '6. Resolved', icon: 'task_alt' }
 ];
 
-export default function LiveTracker({ tickets, selectedTicketId, onSelectTicket, onUpdateTicketStatus }) {
+export default function LiveTracker({
+  tickets,
+  selectedTicketId,
+  onSelectTicket,
+  onUpdateTicketStatus,
+  onClaimTicket,
+  isAuthenticated,
+  onRequireSignIn,
+}) {
   const currentTicket = tickets.find(t => t.id === selectedTicketId) || tickets[0];
 
   if (!currentTicket) {
@@ -45,6 +53,10 @@ export default function LiveTracker({ tickets, selectedTicketId, onSelectTicket,
   const currentStepIdx = getStepIndex(currentTicket.status);
 
   const handleAdvanceStatus = () => {
+    if (!currentTicket.connectedResponder) {
+      onClaimTicket(currentTicket.id);
+      return;
+    }
     const statuses = ['reported', 'broadcasted', 'connected', 'help-arrived', 'at-facility', 'resolved'];
     const nextIdx = (statuses.indexOf(currentTicket.status) + 1) % statuses.length;
     onUpdateTicketStatus(currentTicket.id, statuses[nextIdx]);
@@ -113,7 +125,7 @@ export default function LiveTracker({ tickets, selectedTicketId, onSelectTicket,
 
             <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
               <img 
-                src={currentTicket.photo} 
+                src={currentTicket.photo || `${import.meta.env.BASE_URL}favicon.svg`}
                 alt={currentTicket.title}
                 style={{ 
                   width: '84px', 
@@ -191,7 +203,15 @@ export default function LiveTracker({ tickets, selectedTicketId, onSelectTicket,
                 Connection Milestones
               </span>
               <button 
-                onClick={handleAdvanceStatus}
+                onClick={() => {
+                  if (currentTicket.status === 'resolved') return;
+                  if (!isAuthenticated) {
+                    onRequireSignIn();
+                    return;
+                  }
+                  handleAdvanceStatus();
+                }}
+                disabled={currentTicket.status === 'resolved'}
                 style={{ 
                   fontSize: '11.5px', 
                   fontWeight: 800, 
@@ -201,9 +221,15 @@ export default function LiveTracker({ tickets, selectedTicketId, onSelectTicket,
                   padding: '4px 10px', 
                   borderRadius: 'var(--radius-full)' 
                 }}
-                title="Click to simulate advancing the status for demo"
+                title={isAuthenticated ? 'Advance the assigned rescue report' : 'Sign in to update a rescue report'}
               >
-                Advance Status (Demo)
+                {currentTicket.status === 'resolved'
+                  ? 'Case resolved'
+                  : !isAuthenticated
+                  ? 'Sign in to update'
+                  : currentTicket.connectedResponder
+                    ? 'Advance Status'
+                    : 'Claim this case'}
               </button>
             </div>
 
@@ -292,14 +318,16 @@ export default function LiveTracker({ tickets, selectedTicketId, onSelectTicket,
                   </div>
                 </div>
 
-                <a 
-                  href={`tel:${currentTicket.connectedResponder.phone.replace(/[^0-9+]/g, '')}`}
-                  className="btn-primary"
-                  style={{ padding: '8px 16px', fontSize: '13px' }}
-                >
-                  <Phone size={14} />
-                  Call Helper
-                </a>
+                {currentTicket.connectedResponder.phone && (
+                  <a
+                    href={`tel:${currentTicket.connectedResponder.phone.replace(/[^0-9+]/g, '')}`}
+                    className="btn-primary"
+                    style={{ padding: '8px 16px', fontSize: '13px' }}
+                  >
+                    <Phone size={14} />
+                    Call Helper
+                  </a>
+                )}
               </div>
             </div>
           ) : (
@@ -313,12 +341,18 @@ export default function LiveTracker({ tickets, selectedTicketId, onSelectTicket,
                     Distress call is live on the city volunteer grid & WhatsApp network
                   </div>
                 </div>
-                <button 
+                <button
                   className="btn-primary"
                   style={{ fontSize: '12.5px', padding: '8px 14px' }}
-                  onClick={() => onUpdateTicketStatus(currentTicket.id, 'connected')}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      onRequireSignIn();
+                      return;
+                    }
+                    onClaimTicket(currentTicket.id);
+                  }}
                 >
-                  Simulate Helper Connect
+                  {isAuthenticated ? 'I Can Help / Claim Case' : 'Sign in to claim case'}
                 </button>
               </div>
             </div>
