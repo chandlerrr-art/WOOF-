@@ -12,6 +12,9 @@ export const supabase = hasSupabaseUrl && hasSupabaseKey
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
 function mapReport(row, contact) {
   return {
     id: row.id,
@@ -30,7 +33,7 @@ function mapReport(row, contact) {
     connectedResponder: row.connected_responder,
     nearestFacility: row.nearest_facility,
     timeline: row.timeline || [],
-    reportedBy: contact?.reported_by || 'Community member',
+    reportedBy: contact?.reported_by || 'Not shown',
     reporterPhone: contact?.reporter_phone || '',
   };
 }
@@ -48,55 +51,73 @@ export async function fetchRescueReports(userId) {
       .from('report_contacts')
       .select('report_id, reported_by, reporter_phone');
     if (contactsError) throw contactsError;
-    contactsByReport = Object.fromEntries(contacts.map((contact) => [contact.report_id, contact]));
+    contactsByReport = Object.fromEntries((contacts || []).map((contact) => [contact.report_id, contact]));
   }
 
   return rows.map((row) => mapReport(row, contactsByReport[row.id]));
 }
 
+export function validatePhotoFile(file) {
+  if (!file) return '';
+  if (!ALLOWED_TYPES.includes(file.type)) return 'Choose a JPEG, PNG, or WebP photo.';
+  if (file.size > MAX_PHOTO_BYTES) return 'Photos must be 5 MB or smaller.';
+  return '';
+}
+
 export async function createRescueReport(ticket) {
   const id = `RES-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
-  let photo = ticket.photo;
+  let photo = null;
+  let uploadedPath = '';
 
   if (ticket.photoFile) {
+    const photoError = validatePhotoFile(ticket.photoFile);
+    if (photoError) throw new Error(photoError);
     const file = ticket.photoFile;
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const path = `${crypto.randomUUID()}.${extension}`;
+    const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+    uploadedPath = `${crypto.randomUUID()}.${extension}`;
     const { error: uploadError } = await supabase.storage
       .from('report-photos')
-      .upload(path, file, { contentType: file.type, upsert: false });
+      .upload(uploadedPath, file, { contentType: file.type, upsert: false });
     if (uploadError) throw uploadError;
-    photo = supabase.storage.from('report-photos').getPublicUrl(path).data.publicUrl;
+    photo = supabase.storage.from('report-photos').getPublicUrl(uploadedPath).data.publicUrl;
   }
+
+  const notes = ticket.concern
+    ? `Concern: ${ticket.concern}. ${ticket.notes || ''}`.trim()
+    : (ticket.notes || '');
 
   const report = {
     id,
-    city_id: ticket.cityId,
-    title: ticket.title,
-    species: ticket.species,
+    city_id: ticket.cityId || 'unknown',
+    title: ticket.title.slice(0, 160),
+    species: ticket.species.slice(0, 100),
     urgency: ticket.urgency,
-    status: ticket.status,
-    location: ticket.location,
+    status: 'broadcasted',
+    location: ticket.location.slice(0, 300),
     lat: ticket.lat ?? null,
     lng: ticket.lng ?? null,
-    landmark: ticket.landmark,
-    notes: ticket.notes,
+    landmark: (ticket.landmark || 'Not specified').slice(0, 300),
+    notes: notes.slice(0, 3000),
     photo,
-    nearest_facility: ticket.nearestFacility,
-    timeline: ticket.timeline,
+    nearest_facility: ticket.nearestFacility || null,
   };
   const contact = {
-    reported_by: ticket.reportedBy,
-    reporter_phone: ticket.reporterPhone,
+    reported_by: (ticket.reportedBy || 'Anonymous').slice(0, 120),
+    reporter_phone: (ticket.reporterPhone || '').slice(0, 40),
   };
 
   const { error } = await supabase.rpc('create_rescue_report', {
     report_data: report,
     contact_data: contact,
   });
-  if (error) throw error;
+  if (error) {
+    if (uploadedPath) {
+      await supabase.storage.from('report-photos').remove([uploadedPath]).catch(() => {});
+    }
+    throw error;
+  }
 
-  return { ...ticket, id, photo, photoFile: undefined, timestamp: 'Just now' };
+  return { ...ticket, id, photo, photoFile: undefined, timestamp: new Date().toLocaleString(), status: 'broadcasted' };
 }
 
 export async function claimRescueReport(reportId) {

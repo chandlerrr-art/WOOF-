@@ -1,0 +1,290 @@
+{
+  "name": "projects/3288953200801535159",
+  "title": "Concept Web Application Frontend",
+  "visibility": "PRIVATE",
+  "createTime": "2026-10-17T17:49:23.499419Z",
+  "updateTime": "2026-10-21T17:27:43.516794Z",
+  "projectType": "TEXT_TO_UI_PRO",
+  "thumbnailScreenshot": {
+    "name": "projects/3288953200801535159/screens/468a5eb7ae4746ce815cec4557daf7a8/fileEntries/screenshot",
+    "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1Vd_nlgJ_GQDQ6X0pruHh1b6jc58Y-MxESHQFH0QDclO-NPuC_OZ601EglvgL9fXBPlVlg5VWOtMVSYuANactov4TOLTzWCGbpVU45cRL0UpY_ZmnNhIO35WMs3YHAv7KENLQVv72CQ7r-LxkN5SnfL6iMBjVARJIplG3_ko6YyJ-Mv7xz-AtMGAUx1fMwS7PyjBjIR77vzda-nFRAQDN4asyPpTwNPLdHoXOptQeVZJOVlC2UkNdsWAJg"
+  },
+  "origin": "STITCH",
+  "deviceType": "MOBILE",
+  "designTheme": {
+    "colorMode": "LIGHT",
+    "font": "PLUS_JAKARTA_SANS",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#1b5e3a",
+    "headlineFont": "PLUS_JAKARTA_SANS",
+    "bodyFont": "INTER",
+    "labelFont": "INTER",
+    "namedColors": {
+      "surface_dim": "#d4daea",
+      "error": "#ba1a1a",
+      "on_error_container": "#93000a",
+      "on_surface": "#161c27",
+      "on_secondary_container": "#531800",
+      "outline_variant": "#c0c9bf",
+      "primary": "#004526",
+      "tertiary_fixed": "#92f1fe",
+      "surface_container_lowest": "#ffffff",
+      "primary_fixed_dim": "#92d5a8",
+      "on_tertiary_fixed_variant": "#004f56",
+      "on_background": "#161c27",
+      "secondary_fixed_dim": "#ffb59a",
+      "outline": "#707971",
+      "background": "#f9f9ff",
+      "on_secondary_fixed": "#380d00",
+      "tertiary_container": "#005c65",
+      "on_surface_variant": "#404942",
+      "surface_variant": "#dde2f3",
+      "on_primary_container": "#92d5a8",
+      "on_primary": "#ffffff",
+      "error_container": "#ffdad6",
+      "surface_container_high": "#e3e8f9",
+      "on_tertiary": "#ffffff",
+      "tertiary": "#004349",
+      "on_tertiary_container": "#75d5e2",
+      "on_error": "#ffffff",
+      "inverse_surface": "#2a303d",
+      "surface_container_low": "#f1f3ff",
+      "on_secondary_fixed_variant": "#802a00",
+      "secondary_fixed": "#ffdbcf",
+      "surface_container_highest": "#dde2f3",
+      "primary_container": "#1b5e3a",
+      "tertiary_fixed_dim": "#75d5e2",
+      "inverse_primary": "#92d5a8",
+      "on_primary_fixed": "#00210f",
+      "secondary_container": "#fc6018",
+      "on_secondary": "#ffffff",
+      "surface_tint": "#296a45",
+      "on_primary_fixed_variant": "#09522f",
+      "primary_fixed": "#aef2c2",
+      "surface_container": "#e8eeff",
+      "inverse_on_surface": "#ecf0ff",
+      "on_tertiary_fixed": "#001f23",
+      "surface_bright": "#f9f9ff",
+      "secondary": "#a83900",
+      "surface": "#f9f9ff"
+    },
+    "designMd": "---\nname: Haven Dispatch\ncolors:\n  surface: '#f9f9ff'\n  surface-dim: '#d4daea'\n  surface-bright: '#f9f9ff'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f1f3ff'\n  surface-container: '#e8eeff'\n  surface-container-high: '#e3e8f9'\n  surface-container-highest: '#dde2f3'\n  on-surface: '#161c27'\n  on-surface-variant: '#404942'\n  inverse-surface: '#2a303d'\n  inverse-on-surface: '#ecf0ff'\n  outline: '#707971'\n  outline-variant: '#c0c9bf'\n  surface-tint: '#296a45'\n  primary: '#004526'\n  on-primary: '#ffffff'\n  primary-container: '#1b5e3a'\n  on-primary-container: '#92d5a8'\n  inverse-primary: '#92d5a8'\n  secondary: '#a83900'\n  on-secondary: '#ffffff'\n  secondary-container: '#fc6018'\n  on-secondary-container: '#531800'\n  tertiary: '#004349'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#005c65'\n  on-tertiary-container: '#75d5e2'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#aef2c2'\n  primary-fixed-dim: '#92d5a8'\n  on-primary-fixed: '#00210f'\n  on-primary-fixed-variant: '#09522f'\n  secondary-fixed: '#ffdbcf'\n  secondary-fixed-dim: '#ffb59a'\n  on-secondary-fixed: '#380d00'\n  on-secondary-fixed-variant: '#802a00'\n  tertiary-fixed: '#92f1fe'\n  tertiary-fixed-dim: '#75d5e2'\n  on-tertiary-fixed: '#001f23'\n  on-tertiary-fixed-variant: '#004f56'\n  background: '#f9f9ff'\n  on-background: '#161c27'\n  surface-variant: '#dde2f3'\ntypography:\n  display-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 36px\n    fontWeight: '800'\n    lineHeight: 44px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 30px\n    fontWeight: '700'\n    lineHeight: 38px\n    letterSpacing: -0.015em\n  headline-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 24px\n    fontWeight: '700'\n    lineHeight: 32px\n    letterSpacing: -0.01em\n  headline-sm:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 28px\n  body-lg:\n    fontFamily: Inter\n    fontSize: 17px\n    fontWeight: '400'\n    lineHeight: 26px\n  body-md:\n    fontFamily: Inter\n    fontSize: 15px\n    fontWeight: '400'\n    lineHeight: 22px\n  body-sm:\n    fontFamily: Inter\n    fontSize: 13px\n    fontWeight: '400'\n    lineHeight: 18px\n  label-lg:\n    fontFamily: Inter\n    fontSize: 14px\n    fontWeight: '600'\n    lineHeight: 20px\n    letterSpacing: 0.01em\n  label-md:\n    fontFamily: Inter\n    fontSize: 12px\n    fontWeight: '600'\n    lineHeight: 16px\n    letterSpacing: 0.02em\n  label-sm:\n    fontFamily: Inter\n    fontSize: 11px\n    fontWeight: '700'\n    lineHeight: 14px\n    letterSpacing: 0.04em\nrounded:\n  sm: 0.25rem\n  DEFAULT: 0.5rem\n  md: 0.75rem\n  lg: 1rem\n  xl: 1.5rem\n  full: 9999px\nspacing:\n  gutter: 1rem\n  gutter-mobile: 0.75rem\n  margin: 1rem\n  margin-tablet: 1.5rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2rem\n---\n\n## Brand & Style\n\nThis design system establishes an authoritative, reassuring, and mission-critical visual language tailored for urgent animal rescue operations and field dispatch. The aesthetic synthesizes the clarity of modern public safety utilities with the empathetic warmth of humanitarian field services. \n\n### Core Ethos\n- **Mission-Critical Clarity:** Zero ambiguity under high stress. Critical operational data (intake status, medical urgency, location coordinates) receives absolute hierarchy.\n- **Empathetic Steadiness:** Grounded and competent rather than frantic. Calming forest undertones instill control, while energetic terracotta signals immediate action without triggering panic.\n- **Tactile Utility:** Built primarily for mobile field responders, volunteers, and dispatchers operating one-handed, outdoors, and under variable lighting conditions. Large interactive hit areas, distinct contrast boundaries, and unambiguous state feedback govern every touchpoint.\n\n## Colors\n\nThe color system delivers high functional contrast adhering to strict WCAG AAA guidelines for mission-critical legibility.\n\n### Roles & Tonal Allocations\n- **Primary (`#1B5E3A` / Forest Rescue Green):** Anchors identity, operational stability, primary navigation, validated states, and standard high-priority confirm actions.\n- **Secondary (`#E65100` / Emergency Terracotta):** Reserved strictly for critical alerts, active dispatches, urgent intake triggers, and time-sensitive distress updates.\n- **Tertiary (`#00838F` / Field Cyan):** Identifies active tracking, en-route status markers, volunteer unit locations, and secondary tactical telemetry.\n- **Neutral Core (`#1A202C` / Deep Slate Charcoal):** Governs primary typography, deep structural outlines, and critical icons to avoid pure-black visual fatigue.\n- **Canvas Base:** Soft warm off-white (`#F4F6F4`) on base screens shifts to pure white (`#FFFFFF`) on elevated rescue cards to create natural separation without heavy visual noise.\n- **Status Channels:**\n  - *Pending / Queued:* Warm Amber (`#B45309` on `#FEF3C7`)\n  - *En Route / Dispatched:* Field Cyan (`#0E7490` on `#CFFAFE`)\n  - *Secured / In Care:* Deep Emerald (`#15803D` on `#DCFCE7`)\n  - *Critical / Emergency:* Rescue Terracotta (`#9A3412` on `#FFEDD5`)\n\n## Typography\n\nTypography pairs **Plus Jakarta Sans** for display anchors with **Inter** for dense tabular readouts and operational dispatch reports. \n\n- **Display & Headings (Plus Jakarta Sans):** Provide structural authority and human warmth. Tightened letter-spacing avoids visual sprawl while maintaining clear recognition on mobile displays.\n- **Operational Data & Body (Inter):** High x-height, neutral geometric forms, and unambiguous numerals ensure field coordinates, phone numbers, and species details cannot be misread.\n- **Tabular Figures:** All numeric readouts (ETA countdowns, timestamps, distance metrics) enforce `font-feature-settings: \"tnum\"` for aligned vertical scanning.\n\n## Layout & Spacing\n\nA compact, thumb-driven 8pt rhythmic grid optimized for mobile ergonomics. \n\n- **Layout Structure:** Single-column stacked cards for standard mobile viewports, transitioning to a split 2-column view (Map/Queue) on tablet form factors ($w \\ge 768px$).\n- **Thumb Zones:** All critical execution triggers (SOS, Accept Dispatch, Call Field Medic) live within the lower 35% safe area of the viewport.\n- **Section Rhythm:**\n  - Content gaps inside cards use `space-xs` (4px) and `space-sm` (8px).\n  - Component padding uses `space-md` (16px).\n  - Inter-card spacing defaults to `gutter-mobile` (12px) to maximize screen density without overcrowding.\n\n## Elevation & Depth\n\nVisual hierarchy leverages crisp tonal separation combined with subtle ambient shadows tinted with deep slate and forest undertones.\n\n- **Level 0 (Canvas Base):** Flat `#F4F6F4` background; zero elevation.\n- **Level 1 (Default Operational Cards):** Crisp `#FFFFFF` surface with a subtle perimeter line (`1px solid #E2E8F0`) and an ambient drop shadow: `0 2px 8px -2px rgba(26, 32, 44, 0.06), 0 1px 3px -1px rgba(26, 32, 44, 0.04)`.\n- **Level 2 (Active/Selected Case Cards):** `#FFFFFF` surface bordered by `1.5px solid #1B5E3A` with shadow: `0 8px 20px -4px rgba(27, 94, 58, 0.12), 0 4px 6px -2px rgba(26, 32, 44, 0.04)`.\n- **Level 3 (Modals, Dispatch Trays, Action Sheets):** Floating surfaces with backdrop filter `blur(8px)` over dimmed overlay (`rgba(26, 32, 44, 0.48)`), finished with `0 16px 32px -6px rgba(26, 32, 44, 0.18)`.\n- **Level 4 (Emergency Sticky Triggers):** High-impact terracotta shadow for SOS controls: `0 6px 16px rgba(230, 81, 0, 0.35)`.\n\n## Shapes\n\nThe design system standardizes on a medium-soft 16px (`1rem` / level `2`) radius across all standard interactive containers.\n\n- **Primary Cards & Modals:** `rounded-lg` (16px / 1rem) produces a warm, welcoming, yet orderly frame for intake photos and rescue profiles.\n- **Buttons & Tactical Inputs:** Standard height of 48px to 54px with matched 12px or 16px corners to preserve geometric harmony.\n- **Status Pills & Micro-Badges:** Fully pill-shaped (`9999px`) to immediately distinguish informational metadata from actionable rectangular triggers.\n\n## Components\n\n### Buttons\n- **Emergency CTA (Dispatch / SOS):** Background `#E65100`, text `#FFFFFF`, minimum height 52px, font `label-lg`, rounded 16px. Active tap scales down to `0.98` with high-contrast amber glow.\n- **Primary Confirm (Accept Case, Mark Resolved):** Background `#1B5E3A`, text `#FFFFFF`, 48px height.\n- **Secondary / Action Outlined:** Background transparent, border `1.5px solid #1B5E3A`, text `#1B5E3A`.\n- **Field Utility (Call Vet, Navigate):** Surface `#FFFFFF`, border `1px solid #CBD5E1`, text `#1A202C` with leading primary-tinted icon.\n\n### Cards (Incident & Rescue Profiles)\n- Solid white containers (`#FFFFFF`), 16px corner radius, internal padding of 16px.\n- **Header:** Features a top horizontal lockup containing animal breed/code, time-elapsed counter (`Inter`, tabular numbers), and a status pill.\n- **Divider:** Subtle dotted hairline (`#E2E8F0`).\n- **Urgency Marker:** Critical priority cases display a 4px solid left indicator border in Emergency Terracotta (`#E65100`).\n\n### Segmented Badges & Status Chips\n- Pill geometry with padding `4px 10px`. Text set in `label-sm` (all caps, 0.04em letter spacing).\n- High visual contrast: tinted pastel surface paired with an authoritative, dark foreground tone (e.g., `#FFEDD5` base with `#9A3412` text).\n\n### Lists & Case Feeds\n- 12px vertical spacing between cards.\n- Left-aligned primary thumbnail (64x64px, 12px radius) with an embedded emergency badge overlay when flagged as high priority.\n- Meta rows utilize inline SVG icons (pinned location, pet type, medical status) in neutral slate (`#64748B`).\n\n### Form Inputs & Check Items\n- Inputs feature a 48px base height, `#FFFFFF` fill, 1.5px border in `#CBD5E1`, and 12px border radius.\n- Active/focused state shifts border to `#1B5E3A` with a 3px outer ring tinted to `rgba(27, 94, 58, 0.15)`.\n- Checkboxes: 24x24px, rounded 6px, filled with `#1B5E3A` on check with bold white icon.\n\n### Live Telemetry Bar (Specialized Rescue Component)\n- Top or bottom affixed persistent container displaying dispatch ETA, active radio frequency, and immediate direct-call shortcut to volunteer base.",
+    "colorVariant": "FIDELITY",
+    "overridePrimaryColor": "#1b5e3a",
+    "overrideSecondaryColor": "#e65100",
+    "overrideTertiaryColor": "#00838f",
+    "overrideNeutralColor": "#1a202c",
+    "spacingScale": 2,
+    "typography": {
+      "headline-sm": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "20px",
+        "fontWeight": "600",
+        "lineHeight": "28px"
+      },
+      "display-lg": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "36px",
+        "fontWeight": "800",
+        "lineHeight": "44px",
+        "letterSpacing": "-0.02em"
+      },
+      "label-lg": {
+        "fontFamily": "Inter",
+        "fontSize": "14px",
+        "fontWeight": "600",
+        "lineHeight": "20px",
+        "letterSpacing": "0.01em"
+      },
+      "body-sm": {
+        "fontFamily": "Inter",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "18px"
+      },
+      "headline-md": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "24px",
+        "fontWeight": "700",
+        "lineHeight": "32px",
+        "letterSpacing": "-0.01em"
+      },
+      "body-lg": {
+        "fontFamily": "Inter",
+        "fontSize": "17px",
+        "fontWeight": "400",
+        "lineHeight": "26px"
+      },
+      "headline-lg": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "30px",
+        "fontWeight": "700",
+        "lineHeight": "38px",
+        "letterSpacing": "-0.015em"
+      },
+      "body-md": {
+        "fontFamily": "Inter",
+        "fontSize": "15px",
+        "fontWeight": "400",
+        "lineHeight": "22px"
+      },
+      "label-sm": {
+        "fontFamily": "Inter",
+        "fontSize": "11px",
+        "fontWeight": "700",
+        "lineHeight": "14px",
+        "letterSpacing": "0.04em"
+      },
+      "label-md": {
+        "fontFamily": "Inter",
+        "fontSize": "12px",
+        "fontWeight": "600",
+        "lineHeight": "16px",
+        "letterSpacing": "0.02em"
+      }
+    },
+    "spacing": {
+      "margin": "1rem",
+      "gutter-mobile": "0.75rem",
+      "space-sm": "0.5rem",
+      "space-lg": "1.5rem",
+      "space-xs": "0.25rem",
+      "space-md": "1rem",
+      "space-xl": "2rem",
+      "margin-tablet": "1.5rem",
+      "gutter": "1rem"
+    },
+    "headlineFontFamily": "Plus Jakarta Sans",
+    "bodyFontFamily": "Inter",
+    "labelFontFamily": "Inter"
+  },
+  "screenInstances": [
+    {
+      "id": "1fdf657c-63ca-47c7-aa60-0db0f845cc2f",
+      "sourceScreen": "projects/3288953200801535159/screens/14018023792391754683",
+      "y": 2762,
+      "width": 512,
+      "height": 273,
+      "label": "Screenshot 2026-10-21 224443.png",
+      "type": "SCREEN_INSTANCE"
+    },
+    {
+      "id": "3151d80216fa426e803d0be8d75fbb15",
+      "sourceScreen": "projects/3288953200801535159/screens/3151d80216fa426e803d0be8d75fbb15",
+      "x": 4032,
+      "y": 6333,
+      "width": 1280,
+      "height": 2410,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "42ad0b1a4e044fe1af092e04ef9dd557",
+      "sourceScreen": "projects/3288953200801535159/screens/42ad0b1a4e044fe1af092e04ef9dd557",
+      "x": 1344,
+      "y": 6333,
+      "width": 1280,
+      "height": 1465,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "468a5eb7ae4746ce815cec4557daf7a8",
+      "sourceScreen": "projects/3288953200801535159/screens/e9b9ca1cff1c4b14b243b26afde45e24",
+      "x": 1932,
+      "y": 856,
+      "width": 390,
+      "height": 1650,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "98f190f4739d47f7acca286134bb0066",
+      "sourceScreen": "projects/3288953200801535159/screens/98f190f4739d47f7acca286134bb0066",
+      "x": 2688,
+      "y": 6333,
+      "width": 1280,
+      "height": 2492,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "9e0f39090b5446d3a691afa3fd78d11d",
+      "sourceScreen": "projects/3288953200801535159/screens/3a48384b803b451f8b0439c2487f4dbb",
+      "x": 3024,
+      "y": 906,
+      "width": 390,
+      "height": 1426,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "9e58c33d516946278a4c33ee23825222",
+      "sourceScreen": "projects/3288953200801535159/screens/9e58c33d516946278a4c33ee23825222",
+      "x": 3478,
+      "y": 906,
+      "width": 390,
+      "height": 884,
+      "label": "Haven Rescue Emergency Network"
+    },
+    {
+      "id": "assets_b76e02557c9c415b8e3dd6ccd9014dd0",
+      "x": 576,
+      "y": 2762,
+      "width": 960,
+      "height": 540,
+      "sourceAsset": "assets/b76e02557c9c415b8e3dd6ccd9014dd0",
+      "type": "DESIGN_SYSTEM_INSTANCE"
+    },
+    {
+      "id": "assets_c4401361820f42ccb06b0519f6141d9b",
+      "x": -360,
+      "y": 856,
+      "width": 960,
+      "height": 540,
+      "sourceAsset": "assets/c4401361820f42ccb06b0519f6141d9b",
+      "type": "DESIGN_SYSTEM_INSTANCE"
+    },
+    {
+      "id": "b942d57670e84043be9d165c8c5dee30",
+      "sourceScreen": "projects/3288953200801535159/screens/b942d57670e84043be9d165c8c5dee30",
+      "y": 6333,
+      "width": 1280,
+      "height": 1574,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "bad7205d119d4c149c2b533a0bed7e1a",
+      "sourceScreen": "projects/3288953200801535159/screens/085de23dec7c4c949b220d425a314197",
+      "x": 879,
+      "y": 814,
+      "width": 540,
+      "height": 1560,
+      "label": "Generating Screen...",
+      "isResized": true
+    },
+    {
+      "id": "dda85f854c5e4980bb15097f6917b2d4",
+      "sourceScreen": "projects/3288953200801535159/screens/6cb34fcddac947dca4aa14463e169568",
+      "x": 1478,
+      "y": 856,
+      "width": 390,
+      "height": 1562,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "e5ab88063e40477f81cb3d42a7e9b6c2",
+      "sourceScreen": "projects/3288953200801535159/screens/e5ab88063e40477f81cb3d42a7e9b6c2",
+      "width": 600,
+      "height": 600,
+      "label": "Generating Document..."
+    },
+    {
+      "id": "ead2b0a9fb1046b8a85091691c3bf884",
+      "sourceScreen": "projects/3288953200801535159/screens/ead2b0a9fb1046b8a85091691c3bf884",
+      "x": 1600,
+      "y": 2762,
+      "width": 1280,
+      "height": 3314,
+      "label": "Generating Screen..."
+    }
+  ],
+  "metadata": {
+    "userRole": "OWNER"
+  }
+}

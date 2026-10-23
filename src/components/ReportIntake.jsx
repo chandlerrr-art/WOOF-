@@ -1,463 +1,261 @@
-import React, { useState } from 'react';
-import confetti from 'canvas-confetti';
-import { Camera, MapPin, AlertTriangle, ShieldCheck, ArrowRight, ArrowLeft, Upload, Check, Share2, Sparkles, Phone, Radio, Users } from 'lucide-react';
-import { CITIES, VERIFIED_CENTERS } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, MapPin, Upload } from 'lucide-react';
+import RescueMap from './RescueMap';
+import { nearestCityId } from '../lib/geo';
+import { reverseGeocode } from '../lib/geocode';
+import { ANIMAL_TYPES, PROBLEMS, getProblem } from '../lib/problems';
+import { validatePhotoFile } from '../lib/supabase';
 
-export default function ReportIntake({ activeCity, onSubmitReport, onCancel }) {
-  const currentCityObj = CITIES.find(c => c.id === activeCity) || CITIES[0];
-
+export default function ReportIntake({
+  userLocation,
+  problemId,
+  onSubmitReport,
+  onCancel,
+}) {
   const [step, setStep] = useState(1);
-  const [species, setSpecies] = useState('Indie Dog (Desi)');
-  const [urgency, setUrgency] = useState('critical');
+  const [animalType, setAnimalType] = useState('dog');
+  const [concern, setConcern] = useState(problemId || 'injured');
+  const [notes, setNotes] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
-  const [notes, setNotes] = useState('');
-  const [locationName, setLocationName] = useState('');
+  const [point, setPoint] = useState(userLocation || null);
+  const [locationLabel, setLocationLabel] = useState('');
   const [landmark, setLandmark] = useState('');
   const [reporterName, setReporterName] = useState('');
   const [reporterPhone, setReporterPhone] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
-  const [gpsCoordinates, setGpsCoordinates] = useState(null);
   const [submissionError, setSubmissionError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Closest verified emergency facility in this city
-  const closestCenter = VERIFIED_CENTERS.find(c => c.cityId === activeCity) || VERIFIED_CENTERS[0];
+  useEffect(() => () => {
+    if (photoUrl) URL.revokeObjectURL(photoUrl);
+  }, [photoUrl]);
 
-  const handleCaptureGPS = () => {
+  useEffect(() => {
+    if (userLocation && !point) setPoint(userLocation);
+  }, [userLocation, point]);
+
+  const captureGps = () => {
     if (!navigator.geolocation) {
-      setSubmissionError('This browser does not support location detection.');
+      setSubmissionError('This browser cannot provide a location.');
       return;
     }
     setGpsLoading(true);
     setSubmissionError('');
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const coordinates = { lat: coords.latitude, lng: coords.longitude };
-        setGpsCoordinates(coordinates);
-        setLocationName(`GPS ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)} — ${currentCityObj.name}`);
+      async ({ coords }) => {
+        const next = { lat: coords.latitude, lng: coords.longitude };
+        setPoint(next);
+        try {
+          const label = await reverseGeocode(next);
+          setLocationLabel(label || `${next.lat.toFixed(5)}, ${next.lng.toFixed(5)}`);
+        } catch {
+          setLocationLabel(`${next.lat.toFixed(5)}, ${next.lng.toFixed(5)}`);
+        }
         setGpsLoading(false);
       },
       (error) => {
         setGpsLoading(false);
-        setSubmissionError(`Could not get your location: ${error.message}`);
+        setSubmissionError(error.message || 'Could not read your location.');
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 15000 },
     );
   };
 
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-        setSubmissionError('Choose a JPEG, PNG, or WebP photo smaller than 5 MB.');
-        setPhotoFile(null);
-        setPhotoUrl('');
-        e.target.value = '';
-        return;
-      }
-      const objectUrl = URL.createObjectURL(file);
-      setPhotoUrl(objectUrl);
-      setPhotoFile(file);
-      setSubmissionError('');
+  const handlePhoto = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const error = validatePhotoFile(file);
+    if (error) {
+      setSubmissionError(error);
+      setPhotoFile(null);
+      if (photoUrl) URL.revokeObjectURL(photoUrl);
+      setPhotoUrl('');
+      event.target.value = '';
+      return;
     }
+    if (photoUrl) URL.revokeObjectURL(photoUrl);
+    setPhotoUrl(URL.createObjectURL(file));
+    setPhotoFile(file);
+    setSubmissionError('');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmissionError('');
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!point) {
+      setSubmissionError('Set the animal’s location with GPS or the map marker.');
+      return;
+    }
+    if (!locationLabel.trim()) {
+      setSubmissionError('Add a short location description so responders can find the animal.');
+      return;
+    }
     setSubmitting(true);
-    const newTicket = {
-      cityId: activeCity,
-      title: `${urgency === 'critical' ? 'CRITICAL: ' : ''}${species} Distress Alert`,
-      species,
-      urgency,
+    setSubmissionError('');
+    const problem = getProblem(concern);
+    const speciesLabel = ANIMAL_TYPES.find((item) => item.id === animalType)?.label || 'Animal';
+    const ticket = {
+      cityId: nearestCityId(point),
+      title: `${speciesLabel}: ${problem.label}`.slice(0, 160),
+      species: speciesLabel,
+      concern: problem.label,
+      urgency: problem.urgent ? 'critical' : 'moderate',
       status: 'broadcasted',
-      timestamp: 'Just now',
-      location: locationName,
-      lat: gpsCoordinates?.lat ?? null,
-      lng: gpsCoordinates?.lng ?? null,
-      landmark,
-      reportedBy: reporterName,
-      reporterPhone,
-      notes,
+      location: locationLabel.trim(),
+      lat: point.lat,
+      lng: point.lng,
+      landmark: landmark.trim() || 'Not specified',
+      reportedBy: reporterName.trim(),
+      reporterPhone: reporterPhone.trim(),
+      notes: notes.trim(),
       photo: photoUrl,
       photoFile,
       connectedResponder: null,
-      nearestFacility: {
-        name: closestCenter.name,
-        phone: closestCenter.ambulancePhone,
-        distance: closestCenter.distance
-      },
-      timeline: [
-        { time: 'Just now', event: 'SOS broadcast logged by citizen finder', actor: 'Citizen reporter' },
-        { time: 'Just now', event: `Shared to ${currentCityObj.name} volunteer rescue grid`, actor: 'WOOF Connector' }
-      ]
+      nearestFacility: null,
+      timeline: [{ time: new Date().toLocaleTimeString(), event: 'Report submitted', actor: 'Reporter' }],
     };
-
     try {
-      await onSubmitReport(newTicket);
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+      await onSubmitReport(ticket);
     } catch (error) {
-      setSubmissionError(`Could not submit rescue report: ${error.message}`);
-    } finally {
+      setSubmissionError(error.message || 'Could not submit the report.');
       setSubmitting(false);
     }
   };
 
-  // Pre-formatted WhatsApp SOS card
-  const getWhatsAppShareUrl = () => {
-    const message = `🚨 *URGENT WOOF STRAY ANIMAL SOS* 🚨\n\n*City Sector:* ${currentCityObj.sector}\n*Species:* ${species}\n*Urgency:* ${urgency.toUpperCase()}\n*Location:* ${locationName}\n*Landmark:* ${landmark}\n*Details:* ${notes}\n*Reporter Contact:* ${reporterPhone}\n\n*Immediate Action Needed:* Seeking nearest volunteer with transport or ambulance contact!`;
-    return `https://wa.me/?text=${encodeURIComponent(message)}`;
-  };
-
   return (
-    <div className="rescue-card" style={{ maxWidth: '640px', margin: '0 auto', padding: '22px' }}>
-      {/* Wizard Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+    <div className="intake">
+      <div className="intake-head">
         <div>
-          <span className="status-pill severe" style={{ fontSize: '10.5px', marginBottom: '4px' }}>
-            Community Connecting SOS
-          </span>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800 }}>
-            Broadcast Distress Call
-          </h2>
+          <p className="eyebrow">Report</p>
+          <h2>Report an animal in need</h2>
         </div>
-        <button 
-          onClick={onCancel}
-          style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--color-text-muted)' }}
-        >
-          Cancel
-        </button>
+        <button type="button" className="linkish" onClick={onCancel}>Cancel</button>
       </div>
 
-      {/* Info Notice about connecting portal */}
-      <div style={{ 
-        background: 'var(--color-primary-bg)', 
-        border: '1px solid #ccfbf1', 
-        borderRadius: 'var(--radius-md)', 
-        padding: '10px 14px', 
-        fontSize: '12px', 
-        color: 'var(--color-primary-dark)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        marginBottom: '16px'
-      }}>
-        <Radio size={18} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
-        <span>This will post your distress call on the community rescue board and prepare an instant WhatsApp broadcast for city volunteer groups.</span>
+      <div className="wizard-progress" aria-hidden="true">
+        <div className="wizard-bar"><div className="wizard-bar-fill" style={{ width: `${(step / 3) * 100}%` }} /></div>
+        <span>Step {step} of 3</span>
       </div>
 
-      {/* Wizard Progress Bar */}
-      <div className="wizard-progress">
-        <div className="wizard-bar">
-          <div 
-            className="wizard-bar-fill" 
-            style={{ width: `${(step / 3) * 100}%` }}
-          ></div>
-        </div>
-        <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--color-primary)' }}>
-          Step {step} of 3
-        </span>
-      </div>
-
-      {/* STEP 1: Species & Urgency */}
       {step === 1 && (
         <div>
-          <div className="form-group">
-            <label className="form-label">
-              <span>Select Animal Type</span>
-              <span style={{ fontSize: '11px', color: 'var(--color-secondary)' }}>Required</span>
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-              {['Indie Dog (Desi)', 'Stray Gully Cat', 'Litter of Puppies', 'Litter of Kittens', 'Community Cattle / Cow', 'Other Stray Animal'].map(item => (
-                <button
-                  type="button"
-                  key={item}
-                  onClick={() => setSpecies(item)}
-                  style={{
-                    padding: '11px 13px',
-                    borderRadius: 'var(--radius-md)',
-                    border: species === item ? '2px solid var(--color-primary)' : '1.5px solid var(--color-border)',
-                    background: species === item ? 'var(--color-primary-bg)' : '#ffffff',
-                    color: species === item ? 'var(--color-primary-dark)' : 'var(--color-text-main)',
-                    fontWeight: 700,
-                    fontSize: '12.5px',
-                    textAlign: 'left',
-                    boxShadow: 'var(--shadow-sm)'
-                  }}
-                >
-                  {item}
+          <fieldset className="form-group">
+            <legend className="form-label">Animal type</legend>
+            <div className="choice-grid">
+              {ANIMAL_TYPES.map((item) => (
+                <button key={item.id} type="button" className={animalType === item.id ? 'choice active' : 'choice'} onClick={() => setAnimalType(item.id)}>
+                  {item.label}
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="form-group" style={{ marginTop: '16px' }}>
-            <label className="form-label">
-              <span>Urgency Level (Medical Triage)</span>
-            </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {[
-                { id: 'critical', label: '🔴 Critical Emergency', desc: 'Vehicular hit & run, arterial bleeding, unconscious, severe trauma' },
-                { id: 'severe', label: '🟠 Severe Distress', desc: 'Deep cavity maggot wound, bone fracture, trapped in drain, unable to stand' },
-                { id: 'moderate', label: '🟡 Moderate / Stable', desc: 'Severe skin mange, abandoned unweaned litter, limping, eye infection' }
-              ].map(opt => (
-                <div
-                  key={opt.id}
-                  onClick={() => setUrgency(opt.id)}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    border: urgency === opt.id ? '2px solid var(--color-secondary)' : '1.5px solid var(--color-border)',
-                    background: urgency === opt.id ? '#fff7ed' : '#ffffff',
-                    cursor: 'pointer',
-                    boxShadow: 'var(--shadow-sm)'
-                  }}
-                >
-                  <div style={{ fontWeight: 800, fontSize: '13.5px', color: urgency === opt.id ? 'var(--color-secondary-dark)' : 'var(--color-text-main)' }}>
-                    {opt.label}
-                  </div>
-                  <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                    {opt.desc}
-                  </div>
-                </div>
+          </fieldset>
+          <fieldset className="form-group">
+            <legend className="form-label">Reported concern</legend>
+            <p className="meta">This is what you observed, not a medical diagnosis.</p>
+            <div className="choice-stack">
+              {PROBLEMS.map((item) => (
+                <button key={item.id} type="button" className={concern === item.id ? 'choice active' : 'choice'} onClick={() => setConcern(item.id)}>
+                  {item.label}
+                </button>
               ))}
             </div>
-          </div>
-
-          <button 
-            type="button"
-            className="btn-primary" 
-            style={{ width: '100%', marginTop: '14px', height: '48px' }}
-            onClick={() => setStep(2)}
-          >
-            Continue to Photos & Notes
-            <ArrowRight size={16} />
+          </fieldset>
+          <button type="button" className="btn-primary full" onClick={() => setStep(2)}>
+            Continue <ArrowRight size={16} />
           </button>
         </div>
       )}
 
-      {/* STEP 2: Photo Evidence & Description */}
       {step === 2 && (
         <div>
           <div className="form-group">
-            <label className="form-label">
-              <span>Photo Evidence</span>
-              <span style={{ fontSize: '11px', color: 'var(--color-primary)' }}>Helps Rescuers Evaluate</span>
-            </label>
-            
-            <div style={{ 
-              position: 'relative', 
-              width: '100%', 
-              height: '190px', 
-              borderRadius: 'var(--radius-md)', 
-              overflow: 'hidden',
-              marginBottom: '10px',
-              border: '1.5px solid var(--color-border)'
-            }}>
-              {photoUrl ? (
-                <img
-                  src={photoUrl}
-                  alt="Selected evidence"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--color-text-muted)', fontSize: '13px' }}>
-                  No photo selected (optional)
-                </div>
-              )}
-              <div style={{ 
-                position: 'absolute', 
-                bottom: '10px', 
-                left: '10px', 
-                background: 'rgba(15, 23, 42, 0.85)', 
-                color: 'white', 
-                fontSize: '11px', 
-                padding: '3px 9px', 
-                borderRadius: 'var(--radius-full)',
-                fontWeight: 600 
-              }}>
-                Evidence Photo
-              </div>
-            </div>
-
-            <label 
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '11px',
-                borderRadius: 'var(--radius-md)',
-                border: '1.5px dashed var(--color-border)',
-                background: 'var(--color-surface-dim)',
-                cursor: 'pointer',
-                fontSize: '12.5px',
-                fontWeight: 700,
-                color: 'var(--color-primary)'
-              }}
-            >
-              <Upload size={16} />
-              <span>Choose from Device Camera / Storage</span>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handlePhotoUpload}
-                style={{ display: 'none' }}
-              />
-            </label>
-          </div>
-
-          <div className="form-group">
-            {submissionError && <div role="alert" style={{ color: '#b91c1c', fontSize: '13px' }}>{submissionError}</div>}
-            <label className="form-label">
-              <span>Condition & Situation Notes</span>
-            </label>
-            <textarea 
+            <label className="form-label" htmlFor="report-notes">Description</label>
+            <textarea
+              id="report-notes"
               className="form-textarea"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Describe condition, visible trauma, whether animal is aggressive or quiet, if you are able to stay with the animal..."
-              rows={3}
+              onChange={(event) => setNotes(event.target.value)}
+              maxLength={3000}
+              rows={4}
+              placeholder="Visible injuries, whether the animal can walk, and whether you can stay nearby."
             />
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '14px' }}>
-            <button 
-              type="button"
-              className="btn-secondary" 
-              onClick={() => setStep(1)}
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-            <button 
-              type="button"
-              className="btn-primary" 
-              onClick={() => setStep(3)}
-            >
-              Next: Location & Contact
-              <ArrowRight size={16} />
-            </button>
+          <div className="form-group">
+            <span className="form-label">Photograph (optional)</span>
+            <div className="photo-frame">
+              {photoUrl ? <img src={photoUrl} alt="Selected report photograph" /> : <span>No photo selected</span>}
+            </div>
+            <label className="btn-secondary full">
+              <Upload size={16} />
+              Upload or capture a photo
+              <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={handlePhoto} hidden />
+            </label>
+          </div>
+          {submissionError && <p className="banner error" role="alert">{submissionError}</p>}
+          <div className="action-row">
+            <button type="button" className="btn-secondary" onClick={() => setStep(1)}><ArrowLeft size={16} /> Back</button>
+            <button type="button" className="btn-primary" onClick={() => setStep(3)}>Next <ArrowRight size={16} /></button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: Location & Reporter Contact */}
       {step === 3 && (
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <label className="form-label" style={{ margin: 0 }}>
-                <span>GPS Location of Animal</span>
-              </label>
-              <button
-                type="button"
-                onClick={handleCaptureGPS}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '11.5px',
-                  fontWeight: 800,
-                  color: 'var(--color-primary)',
-                  background: 'var(--color-primary-bg)',
-                  border: '1px solid #ccfbf1',
-                  padding: '3px 10px',
-                  borderRadius: 'var(--radius-full)'
-                }}
-              >
-                <MapPin size={12} />
-                {gpsLoading ? 'Acquiring GPS...' : 'Auto-Detect Live GPS'}
+            <div className="label-row">
+              <label className="form-label" htmlFor="report-location">Location</label>
+              <button type="button" className="linkish" onClick={captureGps}>
+                <MapPin size={14} /> {gpsLoading ? 'Locating…' : 'Use my location'}
               </button>
             </div>
-            
-            <input 
-              type="text" 
+            {point && (
+              <RescueMap
+                className="rescue-map compact"
+                reportPoint={point}
+                onReportPointChange={async (next) => {
+                  setPoint(next);
+                  try {
+                    const label = await reverseGeocode(next);
+                    if (label) setLocationLabel(label);
+                  } catch {
+                    /* keep typed label */
+                  }
+                }}
+              />
+            )}
+            <p className="meta">Drag the marker to the animal if GPS is off by a few metres.</p>
+            <input
+              id="report-location"
               className="form-input"
-              value={locationName}
-              onChange={(e) => setLocationName(e.target.value)}
-              placeholder="Road, sector, or colony name..."
+              value={locationLabel}
+              onChange={(event) => setLocationLabel(event.target.value)}
+              placeholder="Street, area, or landmark"
               required
+              maxLength={300}
             />
           </div>
-
           <div className="form-group">
-            <label className="form-label">
-              <span>Nearest Landmark (Crucial for Indian Rescuers)</span>
-            </label>
-            <input 
-              type="text" 
-              className="form-input"
-              value={landmark}
-              onChange={(e) => setLandmark(e.target.value)}
-              placeholder="e.g. Near Metro Pillar, opposite temple, beside chai stall..."
-              required
-            />
+            <label className="form-label" htmlFor="report-landmark">Landmark (optional)</label>
+            <input id="report-landmark" className="form-input" value={landmark} onChange={(event) => setLandmark(event.target.value)} maxLength={300} placeholder="Gate, shop, metro pillar" />
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="split-fields">
             <div className="form-group">
-              <label className="form-label">
-                <span>Your Name</span>
-              </label>
-              <input 
-                type="text" 
-                className="form-input"
-                value={reporterName}
-                onChange={(e) => setReporterName(e.target.value)}
-                required
-              />
+              <label className="form-label" htmlFor="report-name">Your name (optional)</label>
+              <input id="report-name" className="form-input" value={reporterName} onChange={(event) => setReporterName(event.target.value)} maxLength={120} />
             </div>
             <div className="form-group">
-              <label className="form-label">
-                <span>Phone (+91 WhatsApp)</span>
-              </label>
-              <input 
-                type="tel" 
-                className="form-input"
-                value={reporterPhone}
-                onChange={(e) => setReporterPhone(e.target.value)}
-                placeholder="+91 XXXXX XXXXX"
-                required
-              />
+              <label className="form-label" htmlFor="report-phone">Phone (optional)</label>
+              <input id="report-phone" className="form-input" type="tel" value={reporterPhone} onChange={(event) => setReporterPhone(event.target.value)} maxLength={40} />
             </div>
           </div>
-
-          {/* Submission Triggers */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
-            {submissionError && <div role="alert" style={{ color: '#b91c1c', fontSize: '13px' }}>{submissionError}</div>}
-            <button 
-              type="submit"
-              className="btn-emergency-trigger"
-              style={{ height: '52px' }}
-              disabled={submitting}
-            >
-              <Radio size={20} />
-              {submitting ? 'Posting rescue report…' : 'Post Distress Call to Community Grid'}
-            </button>
-
-            <a 
-              href={getWhatsAppShareUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-whatsapp"
-            >
-              <Share2 size={16} />
-              Also Blast Card to WhatsApp Rescue Groups
-            </a>
-
-            <button 
-              type="button"
-              className="btn-secondary" 
-              onClick={() => setStep(2)}
-              style={{ marginTop: '2px' }}
-            >
-              <ArrowLeft size={16} />
-              Back to Details
-            </button>
-          </div>
+          <p className="meta">Contact details are stored separately and shown only to you or a responder who claims the report.</p>
+          {submissionError && <p className="banner error" role="alert">{submissionError}</p>}
+          <button type="submit" className="btn-primary full" disabled={submitting}>
+            {submitting ? 'Submitting…' : 'Submit report'}
+          </button>
+          <button type="button" className="btn-secondary full" onClick={() => setStep(2)} disabled={submitting}>
+            <ArrowLeft size={16} /> Back
+          </button>
         </form>
       )}
     </div>
