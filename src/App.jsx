@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import Navbar from './components/Navbar';
-import EmergencyHub from './components/EmergencyHub';
+import HelpWorkspace from './components/HelpWorkspace';
 import ReportIntake from './components/ReportIntake';
 import LiveTracker from './components/LiveTracker';
 import DispatcherBoard from './components/DispatcherBoard';
@@ -19,8 +19,7 @@ import {
 } from './lib/supabase';
 
 export default function App() {
-  const [activeCity, setActiveCity] = useState('bengaluru');
-  const [activeTab, setActiveTab] = useState('hub');
+  const [activeTab, setActiveTab] = useState('map');
   const [firstAidGuide, setFirstAidGuide] = useState(null);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [loginPassModalOpen, setLoginPassModalOpen] = useState(false);
@@ -39,6 +38,52 @@ export default function App() {
   const [backendError, setBackendError] = useState('');
   const [actionError, setActionError] = useState('');
 
+  // Geolocation state
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationStatus, setLocationStatus] = useState('prompt'); // 'prompt'|'locating'|'granted'|'denied'|'unavailable'
+  const [locationError, setLocationError] = useState('');
+  const watchIdRef = useRef(null);
+
+  // Problem state (for HelpWorkspace + ReportIntake)
+  const [problemId, setProblemId] = useState('injured');
+
+  const locateMe = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus('unavailable');
+      setLocationError('This browser does not support geolocation.');
+      return;
+    }
+    setLocationStatus('locating');
+    setLocationError('');
+    if (watchIdRef.current != null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+    }
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      ({ coords }) => {
+        setUserLocation({ lat: coords.latitude, lng: coords.longitude });
+        setLocationStatus('granted');
+        setLocationError('');
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationStatus('denied');
+        } else {
+          setLocationStatus('unavailable');
+          setLocationError(error.message || 'Could not read your location.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 },
+    );
+  }, []);
+
+  // Clean up geolocation watch on unmount
+  useEffect(() => () => {
+    if (watchIdRef.current != null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+    }
+  }, []);
+
+  // Persist demo tickets
   useEffect(() => {
     if (supabase) return;
     try {
@@ -48,6 +93,7 @@ export default function App() {
     }
   }, [tickets]);
 
+  // Supabase auth
   useEffect(() => {
     if (!supabase) return undefined;
     let active = true;
@@ -190,47 +236,46 @@ export default function App() {
   return (
     <div className="site-wrapper">
       <Navbar
-        activeCity={activeCity}
-        setActiveCity={setActiveCity}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenReport={() => setReportModalOpen(true)}
         onOpenLoginPass={openLogin}
         currentPass={currentPass}
         openIncidentsCount={openCount}
+        demoMode={!supabase}
       />
 
-      <main style={{ flex: 1 }}>
-        {!supabase && (
-          <div role="status" style={{ padding: '10px 20px', textAlign: 'center', background: '#fff7ed', color: '#9a3412', fontSize: '13px' }}>
-            {supabaseConfigurationError || 'Demo mode: configure Supabase to share reports between visitors.'}
-          </div>
-        )}
-        {(backendError || actionError) && (
-          <div role="alert" style={{ padding: '10px 20px', textAlign: 'center', background: '#fef2f2', color: '#991b1b', fontSize: '13px' }}>
-            {actionError || backendError}
-            <button type="button" onClick={() => { setActionError(''); setBackendError(''); }} style={{ marginLeft: '10px', textDecoration: 'underline' }}>
-              Dismiss
-            </button>
-          </div>
-        )}
-        {(activeTab === 'hub' || activeTab === 'directory') && (
-          <EmergencyHub
-            activeCity={activeCity}
+      {!supabase && (
+        <div role="status" className="demo-banner">
+          {supabaseConfigurationError || 'Demo mode: configure Supabase to share reports between visitors.'}
+        </div>
+      )}
+      {(backendError || actionError) && (
+        <div role="alert" className="error-banner">
+          {actionError || backendError}
+          <button type="button" onClick={() => { setActionError(''); setBackendError(''); }}>
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {activeTab === 'map' && (
+          <HelpWorkspace
+            userLocation={userLocation}
+            locationStatus={locationStatus}
+            locationError={locationError}
+            onLocate={locateMe}
+            problemId={problemId}
+            onProblemChange={setProblemId}
             onOpenReport={() => setReportModalOpen(true)}
-            onNavigateTab={(tab) => {
-              setActiveTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onOpenFirstAid={setFirstAidGuide}
-            onOpenLoginPass={openLogin}
+            onOpenSafety={setFirstAidGuide}
           />
         )}
 
-        {activeTab === 'community' && (
+        {activeTab === 'reports' && (
           <DispatcherBoard
             tickets={tickets}
-            activeCity={activeCity}
             onClaimTicket={handleClaimTicket}
             onUpdateTicketStatus={handleUpdateTicketStatus}
             isAuthenticated={!supabase || Boolean(user)}
@@ -256,8 +301,8 @@ export default function App() {
         )}
 
         {!supabase && (
-          <div style={{ padding: '24px 0', textAlign: 'center', opacity: 0.75 }}>
-            <button onClick={handleResetData} style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--color-text-subtle)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ padding: '24px 0', textAlign: 'center', opacity: 0.7 }}>
+            <button onClick={handleResetData} style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               <RotateCcw size={12} />
               Reset Demo Incidents
             </button>
@@ -277,7 +322,8 @@ export default function App() {
         <div className="modal-backdrop" onClick={() => setReportModalOpen(false)}>
           <div className="modal-sheet" onClick={(event) => event.stopPropagation()}>
             <ReportIntake
-              activeCity={activeCity}
+              userLocation={userLocation}
+              problemId={problemId}
               onSubmitReport={handleNewReport}
               onCancel={() => setReportModalOpen(false)}
             />

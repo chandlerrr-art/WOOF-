@@ -1,14 +1,6 @@
 import React from 'react';
-import { Phone, Navigation, Clock, CheckCircle2, AlertCircle, MessageSquare, MapPin, ShieldAlert, ArrowRight, HeartHandshake, Compass } from 'lucide-react';
-
-const CONNECTION_STEPS = [
-  { id: 'reported', label: '1. Logged', icon: 'campaign' },
-  { id: 'broadcasted', label: '2. Broadcasted', icon: 'share' },
-  { id: 'connected', label: '3. Connected', icon: 'handshake' },
-  { id: 'help-arrived', label: '4. Help Reached', icon: 'location_on' },
-  { id: 'at-facility', label: '5. At Clinic', icon: 'local_hospital' },
-  { id: 'resolved', label: '6. Resolved', icon: 'task_alt' }
-];
+import { Phone, CheckCircle2, AlertCircle, MessageSquare, MapPin, ArrowRight } from 'lucide-react';
+import RescueMap from './RescueMap';
 
 export default function LiveTracker({
   tickets,
@@ -164,34 +156,17 @@ export default function LiveTracker({
             </div>
           </div>
 
-          {/* Simulated Route Map */}
-          <div className="simulated-map" style={{ height: '280px' }}>
-            <div className="map-grid-overlay"></div>
-            <div className="map-route-line"></div>
-
-            <div className="map-marker" style={{ top: '50%', left: '20%' }}>
-              <div className="map-marker-pin" style={{ background: 'var(--color-secondary)' }}>
-                <span className="material-symbols-outlined fill-1" style={{ fontSize: '18px' }}>pets</span>
-              </div>
-              <span className="map-marker-label">Animal Location</span>
+          {/* Live Map */}
+          {(currentTicket.lat && currentTicket.lng) ? (
+            <RescueMap
+              className="rescue-map compact"
+              reportPoint={{ lat: currentTicket.lat, lng: currentTicket.lng }}
+            />
+          ) : (
+            <div style={{ height: '280px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+              No map coordinates for this report
             </div>
-
-            <div className="map-marker" style={{ top: '50%', left: '55%' }}>
-              <div className="map-marker-pin" style={{ background: 'var(--color-primary)' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>handshake</span>
-              </div>
-              <span className="map-marker-label">
-                {currentTicket.connectedResponder?.name ? 'Connected Helper' : 'Volunteers Alerted'}
-              </span>
-            </div>
-
-            <div className="map-marker" style={{ top: '50%', left: '85%' }}>
-              <div className="map-marker-pin" style={{ background: 'var(--color-tertiary)' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>local_hospital</span>
-              </div>
-              <span className="map-marker-label">Nearest Vet Bay</span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Right Column: Connection Milestones, Helper Profile & Log */}

@@ -43,11 +43,8 @@ export const VERIFIED_CENTERS = [
     address: 'KVAFSU Campus, Bellary Rd, Hebbal, Bengaluru',
     phone: '+91 80 2294 7307',
     ambulancePhone: '+91 80 2294 7311',
-    openStatus: 'Open 24/7',
-    distance: '2.4 km',
     verified: true,
     capabilities: ['Direct Ambulance Helpline', 'Night Emergency Casualty', 'Surgical Triage'],
-    image: 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=CUPA+Trauma+Centre+Bengaluru'
   },
   {
@@ -59,11 +56,8 @@ export const VERIFIED_CENTERS = [
     address: 'Survey No. 124, Mittaganahalli, Kogilu, Yelahanka, Bengaluru',
     phone: '+91 94839 16052',
     ambulancePhone: '+91 94839 16052',
-    openStatus: 'Open 9 AM - 6 PM',
-    distance: '5.1 km',
     verified: true,
     capabilities: ['Paraplegic Canine Care', 'Direct Foster Advice', 'Community Animal Aid'],
-    image: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=CARE+Charlies+Animal+Rescue+Centre'
   },
   {
@@ -75,11 +69,8 @@ export const VERIFIED_CENTERS = [
     address: '271 & 272, Flyover Market, Defence Colony, New Delhi',
     phone: '+91 11 2432 0707',
     ambulancePhone: '+91 11 2432 0303',
-    openStatus: 'Open 24/7',
-    distance: '1.8 km',
     verified: true,
     capabilities: ['Emergency Ambulance Desk', 'Night Casualty OPD', 'Trauma Bay'],
-    image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=Friendicoes+Defence+Colony'
   },
   {
@@ -91,11 +82,8 @@ export const VERIFIED_CENTERS = [
     address: 'Shivaji College Road, Raja Garden, New Delhi',
     phone: '+91 11 2544 8062',
     ambulancePhone: '+91 11 2544 7751',
-    openStatus: 'Open 24/7 Emergency',
-    distance: '6.3 km',
     verified: true,
     capabilities: ['24-Hour Ambulance Hotline', 'Free ABC/Sterilization', 'Canine Ward'],
-    image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=Sanjay+Gandhi+Animal+Care+Centre'
   },
   {
@@ -107,11 +95,8 @@ export const VERIFIED_CENTERS = [
     address: 'Next to Deonar Abattoir, Main Gate, Govandi West, Mumbai',
     phone: '+91 93200 56585',
     ambulancePhone: '+91 93200 56581',
-    openStatus: 'Open 24/7',
-    distance: '3.2 km',
     verified: true,
     capabilities: ['Mobile Vet Ambulance', 'Road Accident Intake', 'Emergency Trauma Bay'],
-    image: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=In+Defense+of+Animals+Deonar+Mumbai'
   },
   {
@@ -123,11 +108,8 @@ export const VERIFIED_CENTERS = [
     address: 'Adarsh Nagar, Lower Parel / Mahalaxmi, Mumbai',
     phone: '+91 22 6422 2838',
     ambulancePhone: '+91 22 6422 2838',
-    openStatus: 'Open 9:30 AM - 5:30 PM',
-    distance: '4.7 km',
     verified: true,
     capabilities: ['Field Wound Dressing', 'Vaccination Vans', 'Direct Feeder Network'],
-    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=Welfare+of+Stray+Dogs+Mumbai'
   },
   {
@@ -139,11 +121,8 @@ export const VERIFIED_CENTERS = [
     address: 'Plot 390, Paud Rd, near Chandani Chowk, Bavdhan, Pune',
     phone: '+91 98909 99111',
     ambulancePhone: '+91 98909 99111',
-    openStatus: 'Open 24/7',
-    distance: '2.1 km',
     verified: true,
     capabilities: ['Emergency Rescue Helpline', 'Critical Surgery', 'Wildlife & Street Dog ICU'],
-    image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=RESQ+Charitable+Trust+Pune'
   },
   {
@@ -155,11 +134,8 @@ export const VERIFIED_CENTERS = [
     address: 'No 72, Velachery Road, Guindy, Chennai',
     phone: '+91 44 2235 4959',
     ambulancePhone: '+91 44 2230 0666',
-    openStatus: 'Open 24/7 Emergency',
-    distance: '3.8 km',
     verified: true,
     capabilities: ['24-Hour Rescue Ambulance Desk', 'Sanctuary OPD', 'Emergency Sterilization'],
-    image: 'https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?auto=format&fit=crop&w=600&q=80',
     mapsUrl: 'https://maps.google.com/?q=Blue+Cross+of+India+Chennai'
   }
 ];

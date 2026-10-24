@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { ShieldAlert, MapPin, Clock, CheckCircle2, UserCheck, MessageSquare, Phone, Filter, ArrowRight, HeartHandshake, Share2, Navigation } from 'lucide-react';
-import { CITIES } from '../data/mockData';
+import { MapPin, CheckCircle2, UserCheck, MessageSquare, Phone, ArrowRight, HeartHandshake } from 'lucide-react';
 
 export default function DispatcherBoard({
   tickets,
-  activeCity,
   onClaimTicket,
   onUpdateTicketStatus,
   onSelectTicketAndTrack,
@@ -14,10 +12,7 @@ export default function DispatcherBoard({
   const [filterUrgency, setFilterUrgency] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const currentCityObj = CITIES.find(c => c.id === activeCity) || CITIES[0];
-
   const filteredTickets = tickets.filter(t => {
-    const matchesCity = t.cityId === activeCity;
     const matchesUrgency = filterUrgency === 'all' || t.urgency === filterUrgency;
     const matchesStatus = filterStatus === 'all' 
       ? true 
@@ -25,7 +20,7 @@ export default function DispatcherBoard({
         ? ['reported', 'broadcasted'].includes(t.status)
         : t.status === filterStatus;
 
-    return matchesCity && matchesUrgency && matchesStatus;
+    return matchesUrgency && matchesStatus;
   });
 
   return (
@@ -53,10 +48,10 @@ export default function DispatcherBoard({
                 Community Volunteer & Rescuer Grid
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 800, color: 'var(--color-text-main)', marginTop: '2px' }}>
-                Open Stray Animal Distress Calls in {currentCityObj.name}
+                Open Stray Animal Distress Calls
               </h1>
               <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)' }}>
-                Citizens who need local volunteer transport, net capture, or foster support in <strong>{currentCityObj.sector}</strong>.
+                Citizens who need local volunteer transport, net capture, or foster support.
               </p>
             </div>
           </div>
@@ -96,9 +91,9 @@ export default function DispatcherBoard({
         {filteredTickets.length === 0 ? (
           <div className="rescue-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px 20px' }}>
             <CheckCircle2 size={44} style={{ color: 'var(--color-primary)', margin: '0 auto 12px' }} />
-            <div style={{ fontWeight: 800, fontSize: '18px' }}>No Open Distress Calls in {currentCityObj.sector}</div>
+            <div style={{ fontWeight: 800, fontSize: '18px' }}>No Open Distress Calls</div>
             <div style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', marginTop: '6px' }}>
-              All reported animals in this city sector have been connected with volunteers or ambulances!
+              All reported animals have been connected with volunteers or ambulances!
             </div>
           </div>
         ) : (

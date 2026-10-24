@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { INDIA_VIEW } from '../lib/geo';
@@ -43,7 +43,9 @@ export default function RescueMap({
     report: null,
   });
   const callbacksRef = useRef({ onSelectFacility, onReportPointChange });
-  callbacksRef.current = { onSelectFacility, onReportPointChange };
+  useLayoutEffect(() => {
+    callbacksRef.current = { onSelectFacility, onReportPointChange };
+  });
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return undefined;
